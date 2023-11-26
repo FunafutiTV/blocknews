@@ -8,9 +8,9 @@ export default function Home() {
     limit: LimitType.TwentyFive,
     orderBy: ExplorePublicationsOrderByType.Latest,
     where: {
-      "publicationTypes": ExplorePublicationType["POST"],
-      "metadata": {
-        // "publishedOn": [AppId]
+      publicationTypes: [ExplorePublicationType.Post],
+      metadata: {
+        // publishedOn: [AppId]
       }
     }
   })
@@ -21,17 +21,16 @@ export default function Home() {
   }
 
   if (error) {
-    return(<>Error : {error}</>)
+    console.log(error)
+    return(<>Error</>)
   }
   
   return (
-    <div>
+    <>
       <Heading>My Lens App</Heading>
-      {
-        data?.map((publication, index) => (
-          <Post loading={loading} publication={publication} key={index}/>
-        ))
-      }
-    </div>
+      {data?.map((publication, index) => (
+          <Post publication={publication} key={index}/>
+      ))}
+    </>
   )
 }

@@ -402,23 +402,23 @@ describe("SocialNetwork Tests", () => {
     });
 
     it("Should take an empty spot (address 0) in array if it has a positive score", async() => {
-      await expect(socialNetwork.connect(addr2).upvote(1)).to.emit(socialNetwork, "newTopUser").withArgs(addr1.address, "0x0000000000000000000000000000000000000000");
+      await expect(socialNetwork.connect(addr2).upvote(1)).to.emit(socialNetwork, "NewTopUser").withArgs(addr1.address, "0x0000000000000000000000000000000000000000");
     });
 
     it("Should not change array if it has a score of 0 or less", async() => {
-      await expect(socialNetwork.connect(addr2).downvote(1)).not.to.emit(socialNetwork, "newTopUser");
+      await expect(socialNetwork.connect(addr2).downvote(1)).not.to.emit(socialNetwork, "NewTopUser");
     });
 
     it("Should not change array if it is already in the array but has a positive score", async() => {
       await socialNetwork.connect(addr2).upvote(1);
 
-      await expect(socialNetwork.connect(addr3).upvote(1)).not.to.emit(socialNetwork, "newTopUser");
+      await expect(socialNetwork.connect(addr3).upvote(1)).not.to.emit(socialNetwork, "NewTopUser");
     });
 
     it("Should be replaced by address 0 if it is already in array but has a score of 0 or less", async() => {
       await socialNetwork.connect(addr2).upvote(1);
 
-      await expect(socialNetwork.connect(addr3).downvote(1)).to.emit(socialNetwork, "newTopUser").withArgs("0x0000000000000000000000000000000000000000", addr1.address);
+      await expect(socialNetwork.connect(addr3).downvote(1)).to.emit(socialNetwork, "NewTopUser").withArgs("0x0000000000000000000000000000000000000000", addr1.address);
     });
   });
 
@@ -464,6 +464,8 @@ describe("SocialNetwork Tests", () => {
 
       expect(await socialNetwork.connect(addr1).hasBeenRewarded("0x0000000000000000000000000000000000000000", 202312)).to.equal(false);
     });
+
+    // test event emission
 
     it("Should increase month by 89 if it is December", async () => {
       const monthBeforeCall = await socialNetwork.connect(addr1).month();

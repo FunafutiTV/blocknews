@@ -1,41 +1,21 @@
 'use client'
-import { usePublication, usePublications, LimitType, PublicationType, publicationId } from '@lens-protocol/react-web';
-import Post from "../../../components/Post";
+import Header from "@/components/Header"
+import PostPageContent from "../../../components/PostPageContent";
 
-export default function PostPage({params : { id }}) {
+import { Box } from "@chakra-ui/react"
+import { useContext } from 'react'
 
-    const { data, error, loading } = usePublication({
-        forId: id,
-    });
+import { StateContext } from "../../layout"
 
-    const { data: comments, error: commentsError, loading: commentsLoading } = usePublications({
-        limit: LimitType.TwentyFive,
-        where: {
-            commentOn: {
-                id: id,
-        }},
-    })
+export default function Home({params : { id }}) {
 
-    if (error || commentsError) {
-        console.log(error)
-        console.log(commentsError)
-        return(<>Error</>)
-    }
+    const { isConnected, setIsConnected } = useContext(StateContext);
 
-    if (loading || commentsLoading) {
-        return(<>Spinner</>)
-    }
-    
     return(
-        <>
-            <Post publication={data}/>
-            <> 
-                {comments?.map((publication, index) => {
-                    return (
-                    <Post publication={publication} key={index}/>
-                )})}
-                    </>
-        </>
+        <Box minHeight="100vh" bgGradient="linear(to-br, rgba(255,255,255,1), rgba(255,255,255,1) 20%, rgba(236,227,241,1))">
+            <Header />
+            {isConnected ? <PostPageContent id={id}/> : <>Please sign in</>}
+        </Box>
     )
     
 }

@@ -8,14 +8,44 @@ contract SocialNetwork is Ownable {
 
     enum Vote { NoVote, Downvote, Upvote }
 
-    mapping (address => int) profileScore;
+    struct Post {
+        bool exists;
+        uint id;
+        address poster;
+        string content;
+        uint isCommentOfID;
+        int score;
+        uint[] commentsIDs;
+    }
+
+    struct Follow {
+        bool follows;
+        uint positionInFollowingsArray;
+        uint positionInFollowersArray;
+    }
+
+    struct FollowList {
+        address[] followList;
+        uint number;
+    }
+
+    struct User {
+        string name;
+        int score;
+        FollowList followingsList;
+        FollowList followersList;
+        uint[] postsIDs;
+    }
+
     mapping (uint => mapping (address => int)) monthlyProfileScore;
-    mapping (uint => int) publicationScore;
     mapping (address => mapping (uint => Vote)) hasVoted;
-    mapping (uint => address) publicationPoster;
+    mapping (uint => Post) postByID;
+    mapping (address => mapping (address => Follow)) follows;
+    mapping (address => User) userByAddress;
     
     address[3] topUsers;
     uint public month = 202312;
+    uint public nextUnusedPublicationID = 1;
     
     TopUsersSFT topUsersSFT = new TopUsersSFT();
 
@@ -24,17 +54,22 @@ contract SocialNetwork is Ownable {
     event RemovedUpvote(address voter, uint publicationID);
     event Downvoted(address voter, uint publicationID);
     event RemovedDownvote(address voter, uint publicationID);
-    event newTopUser(address newTopUser, address previousTopUser);
+    event ChangedName(address user, string previousName, string newName);
+    event NewTopUser(address newTopUser, address previousTopUser);
+    event Followed(address follower, address followed);
+    event Unfollowed(address follower, address followed);
+    event RewardedUser(address user, uint month);
+
 
     constructor() Ownable(msg.sender) {}
 
     modifier publicationExists(uint _publicationID) {
-        require(publicationPoster[_publicationID] != address(0), "Publication with given ID does not exist");
+        require(postByID[_publicationID].exists, "Publication with given ID does not exist");
         _;
     }
 
     function getProfileScore(address _user) external view returns (int) {
-        return profileScore[_user];
+        return userByAddress[_user].score;
     }
 
     function getMonthlyProfileScore(address _user, uint _month) external view returns (int) {
@@ -42,12 +77,17 @@ contract SocialNetwork is Ownable {
         return monthlyProfileScore[_month][_user];
     }
 
-    function getPublicationScore(uint _publicationID) external publicationExists(_publicationID) view returns (int) {
-        return publicationScore[_publicationID];
+    function doesFollow(address _user, address _target) external view returns (bool) {
+        return follows[_user][_target].follows;
     }
 
-    function getPublicationPoster(uint _publicationID) external publicationExists(_publicationID) view returns (address) {
-        return publicationPoster[_publicationID];
+    function getPublication(uint _publicationID) external publicationExists(_publicationID) view returns (Post memory) {
+        return postByID[_publicationID];
+    }
+
+    function getUser(address _user) external view returns (User memory) {
+        require (_user != address(0), "User with address 0 does not exist");
+        return userByAddress[_user];
     }
 
     function hasBeenRewarded(address _user, uint _month) external view returns (bool) {
@@ -55,6 +95,22 @@ contract SocialNetwork is Ownable {
         require(SFTnumber < 2, "Error. The user shouldn't have more than one SFT for a month.");
         if (SFTnumber == 1) return true;
         else return false;
+    }
+
+    function getFollowingsList(address _user) external view returns (address[] memory) {
+        return userByAddress[_user].followingsList.followList;
+    }
+
+    function getFollowersList(address _user) external view returns (address[] memory) {
+        return userByAddress[_user].followersList.followList;
+    }
+
+    function getFollowingsNumber(address _user) external view returns (uint) {
+        return userByAddress[_user].followingsList.number;
+    }
+
+    function getFollowersNumber(address _user) external view returns (uint) {
+        return userByAddress[_user].followersList.number;
     }
 
     function upvoteOrDownvote(address _user, uint _publicationID) public publicationExists(_publicationID) view returns (uint) {
@@ -75,7 +131,7 @@ contract SocialNetwork is Ownable {
             for(uint i = 0; i < topUsers.length; i++) {
                 if (topUsers[i] == _user) {
                     topUsers[i] = address(0);
-                    emit newTopUser(address(0), _user);
+                    emit NewTopUser(address(0), _user);
                     break;
                 }
             }
@@ -93,36 +149,57 @@ contract SocialNetwork is Ownable {
             if (!isInArray && monthlyProfileScore[month][_user] > lowestScore) {
                 address previousTopUser = topUsers[lowestScorePosition];
                 topUsers[lowestScorePosition] = _user;
-                emit newTopUser(_user, previousTopUser);
+                emit NewTopUser(_user, previousTopUser);
             }
         }
     }
 
-    function post(uint _publicationID) external { // attention si cette fonction n'est pas appelée par la dapp peut causer des soucis
-        require(publicationPoster[_publicationID] == address(0), "Publication with given ID already exists");
-        publicationPoster[_publicationID] = msg.sender;
+    function changeName(string calldata _newName) external {
+        require(bytes(_newName).length != 0, "Name must not be empty");
+        require(bytes(_newName).length <= 24, "Name must not be longer than 24 characters");
+        string memory previousName = userByAddress[msg.sender].name;
+        userByAddress[msg.sender].name = _newName;
+        emit ChangedName(msg.sender, previousName, _newName);
+    }
+
+    function post(string calldata _content, uint _parentPostID) external { // attention si cette fonction n'est pas appelée par la dapp peut causer des soucis
+        require(!postByID[nextUnusedPublicationID].exists, "Error : Post already exists");
+        require(bytes(_content).length != 0, "Publication can't be empty");
+        require(bytes(_content).length <= 300, "Publications are limited to 300 characters");
+        uint _publicationID = nextUnusedPublicationID;
+        postByID[_publicationID].exists = true;
+        postByID[_publicationID].id = _publicationID;
+        postByID[_publicationID].poster = msg.sender;
+        postByID[_publicationID].content = _content;
+        userByAddress[msg.sender].postsIDs.push(_publicationID);
+        if (_parentPostID != 0) {
+            require(postByID[_parentPostID].exists, "Parent post doesn't exist");
+            postByID[_publicationID].isCommentOfID = _parentPostID;
+            postByID[_parentPostID].commentsIDs.push(_publicationID);
+        }
+        ++nextUnusedPublicationID;
         emit NewPost(_publicationID, msg.sender);
     }
 
     function downvote(uint _publicationID) external publicationExists(_publicationID) {
-        address _poster = publicationPoster[_publicationID];
+        address _poster = postByID[_publicationID].poster;
         if (upvoteOrDownvote(msg.sender, _publicationID) == 1) {
-            ++profileScore[_poster];
+            ++userByAddress[_poster].score;
             ++monthlyProfileScore[month][_poster];
-            ++publicationScore[_publicationID];
+            ++postByID[_publicationID].score;
             hasVoted[msg.sender][_publicationID] = Vote.NoVote;
             emit RemovedDownvote(msg.sender, _publicationID);
         } else if (upvoteOrDownvote(msg.sender, _publicationID) == 2) {
-            profileScore[_poster] -= 2;
+            userByAddress[_poster].score -= 2;
             monthlyProfileScore[month][_poster] -=2;
-            publicationScore[_publicationID] -= 2;
+            postByID[_publicationID].score -= 2;
             hasVoted[msg.sender][_publicationID] = Vote.Downvote;
             emit RemovedUpvote(msg.sender, _publicationID);
             emit Downvoted(msg.sender, _publicationID);
         } else {
-            --profileScore[_poster];
+            --userByAddress[_poster].score;
             --monthlyProfileScore[month][_poster];
-            --publicationScore[_publicationID];
+            --postByID[_publicationID].score;
             hasVoted[msg.sender][_publicationID] = Vote.Downvote;
             emit Downvoted(msg.sender, _publicationID);
         }
@@ -130,34 +207,61 @@ contract SocialNetwork is Ownable {
     }
 
     function upvote(uint _publicationID) external publicationExists(_publicationID) {
-        address _poster = publicationPoster[_publicationID];
+        address _poster = postByID[_publicationID].poster;
         if (upvoteOrDownvote(msg.sender, _publicationID) == 2) {
-            --profileScore[_poster];
+            --userByAddress[_poster].score;
             --monthlyProfileScore[month][_poster];
-            --publicationScore[_publicationID];
+            --postByID[_publicationID].score;
             hasVoted[msg.sender][_publicationID] = Vote.NoVote;
             emit RemovedUpvote(msg.sender, _publicationID);
         } else if (upvoteOrDownvote(msg.sender, _publicationID) == 1) {
-            profileScore[_poster] += 2;
+            userByAddress[_poster].score += 2;
             monthlyProfileScore[month][_poster] += 2;
-            publicationScore[_publicationID] += 2;
+            postByID[_publicationID].score += 2;
             hasVoted[msg.sender][_publicationID] = Vote.Upvote;
             emit RemovedDownvote(msg.sender, _publicationID);
             emit Upvoted(msg.sender, _publicationID);
         } else {
-            ++profileScore[_poster];
+            ++userByAddress[_poster].score;
             ++monthlyProfileScore[month][_poster];
-            ++publicationScore[_publicationID];
+            ++postByID[_publicationID].score;
             hasVoted[msg.sender][_publicationID] = Vote.Upvote;
             emit Upvoted(msg.sender, _publicationID);
         }
         setNewTopUsers(_poster);
     }
 
+    function follow(address _followed) public {
+        require(_followed != msg.sender, "You can't follow yourself");
+        require(!follows[msg.sender][_followed].follows, "You already follow this address");
+        follows[msg.sender][_followed].follows = true;
+        userByAddress[msg.sender].followingsList.followList.push(_followed);
+        ++userByAddress[msg.sender].followingsList.number;
+        userByAddress[_followed].followersList.followList.push(msg.sender);
+        ++userByAddress[_followed].followersList.number;
+        follows[msg.sender][_followed].positionInFollowingsArray = userByAddress[msg.sender].followingsList.followList.length - 1;
+        follows[msg.sender][_followed].positionInFollowersArray = userByAddress[_followed].followersList.followList.length - 1;
+        emit Followed(msg.sender, _followed);
+    }
+
+    function unfollow(address _unfollowed) public {
+        require(_unfollowed != msg.sender, "You can't unfollow yourself");
+        require(follows[msg.sender][_unfollowed].follows, "You don't follow this address");
+        follows[msg.sender][_unfollowed].follows = false;
+        uint positionInFollowingsArray = follows[msg.sender][_unfollowed].positionInFollowingsArray;
+        uint positionInFollowersArray = follows[msg.sender][_unfollowed].positionInFollowersArray;
+        userByAddress[msg.sender].followingsList.followList[positionInFollowingsArray] = address(0);
+        --userByAddress[msg.sender].followingsList.number;
+        userByAddress[_unfollowed].followersList.followList[positionInFollowersArray] = address(0);
+        --userByAddress[_unfollowed].followersList.number;
+        emit Unfollowed(msg.sender, _unfollowed);
+    }
+
     function rewardTopUsers() public onlyOwner {
         for(uint i = 0; i < topUsers.length; i++) {
             if (topUsers[i] != address(0)) {
                 topUsersSFT.mintOne(topUsers[i], month);
+                emit RewardedUser(topUsers[i], month);
             }
         }
         if (month % 100 == 12) {

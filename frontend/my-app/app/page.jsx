@@ -1,36 +1,20 @@
 'use client'
-import { useExplorePublications, ExplorePublicationsOrderByType, LimitType, ExplorePublicationType } from '@lens-protocol/react-web'
-import Post from "../components/Post"
-import { Heading } from '@chakra-ui/react' 
+// Components
+import Header from "@/components/Header"
+import MainPageContent from "@/components/MainPageContent"
+import { Box } from "@chakra-ui/react"
+import { useContext } from 'react'
+
+import { StateContext } from "./layout"
 
 export default function Home() {
-  const { data, error, loading } = useExplorePublications({
-    limit: LimitType.TwentyFive,
-    orderBy: ExplorePublicationsOrderByType.Latest,
-    where: {
-      publicationTypes: [ExplorePublicationType.Post],
-      metadata: {
-        // publishedOn: [AppId]
-      }
-    }
-  })
-  console.log('data: ', data)
 
-  if (loading) {
-    return(<>spinner</>)
-  }
+  const { isConnected, setIsConnected } = useContext(StateContext);
 
-  if (error) {
-    console.log(error)
-    return(<>Error</>)
-  }
-  
   return (
-    <>
-      <Heading>My Lens App</Heading>
-      {data?.map((publication, index) => (
-          <Post publication={publication} key={index}/>
-      ))}
-    </>
+    <Box minHeight="100vh" bgGradient="linear(to-br, rgba(255,255,255,1), rgba(255,255,255,1) 20%, rgba(236,227,241,1))">
+      <Header />
+      {isConnected ? <MainPageContent/> : <>Please sign in</>}
+    </Box>
   )
 }

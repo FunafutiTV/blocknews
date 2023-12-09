@@ -7,7 +7,7 @@ import { prepareWriteContract, writeContract, waitForTransaction, readContract }
 import { useAccount, usePublicClient } from 'wagmi';
 
 // Contracts informations
-import { abi, contractAddress } from '@/constants';
+import { abi, contractAddress } from '../constants';
 
 import { useState, useEffect } from 'react';
 

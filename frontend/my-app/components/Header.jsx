@@ -12,7 +12,7 @@ import Image from "next/image";
 
 import { useState, useEffect, useContext } from 'react';
 
-import { abi, contractAddress } from '@/constants';
+import { abi, contractAddress } from '../constants';
 
 import { readContract, prepareWriteContract, writeContract, waitForTransaction } from '@wagmi/core';
 import { useSignMessage, useAccount } from 'wagmi'

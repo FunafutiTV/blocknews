@@ -5,7 +5,7 @@ import Comment from "./Comment";
 import { readContract } from '@wagmi/core';
 
 // Contracts informations
-import { abi, contractAddress } from '@/constants';
+import { abi, contractAddress } from '../constants';
 
 import { useState, useEffect } from 'react';
 

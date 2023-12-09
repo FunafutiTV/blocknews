@@ -4,7 +4,7 @@ import { readContract } from '@wagmi/core';
 
 import { useState, useEffect } from 'react';
 
-import { abi, contractAddress } from '@/constants';
+import { abi, contractAddress } from '../constants';
 
 import Link from 'next/link';
 

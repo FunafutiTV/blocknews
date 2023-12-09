@@ -6,7 +6,7 @@ import { readContract } from '@wagmi/core';
 
 import { useState, useEffect } from 'react';
 
-import { abi, contractAddress } from '@/constants';
+import { abi, contractAddress } from '../constants';
 
 import { useSignMessage, useAccount } from 'wagmi'
 

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 
 import { readContract } from '@wagmi/core';
 
-import { abi, contractAddress } from '@/constants';
+import { abi, contractAddress } from '../constants';
 
 import { Box, Image } from '@chakra-ui/react'; 
 

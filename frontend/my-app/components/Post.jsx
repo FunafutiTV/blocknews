@@ -2,7 +2,7 @@
 import { Box, Text, Image, Button } from '@chakra-ui/react'
 import Link from 'next/link'
 
-import { abi, contractAddress } from '@/constants';
+import { abi, contractAddress } from '../constants';
 
 import { useState, useEffect } from 'react'
 

@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import { readContract, prepareWriteContract, writeContract, waitForTransaction } from '@wagmi/core';
 import { useAccount, usePublicClient } from 'wagmi';
 
-import { abi, contractAddress } from '@/constants';
+import { abi, contractAddress } from '../constants';
 import { Button } from '@chakra-ui/react';
 
 import Link from 'next/link'

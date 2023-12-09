@@ -2,6 +2,7 @@
 
 import ChangeName from './ChangeName';
 import Post from './Post';
+import DisplaySFTs from './DisplaySFTs';
 
 import { useState, useEffect } from 'react';
 
@@ -28,6 +29,10 @@ export default function ProfilePageContent({ handle }) {
     const [displayedPosts, setDisplayedPosts] = useState([]);
 
     const [noSecondCall, setNoSecondCall] = useState(false);
+
+    const [nameChange, setNameChange] = useState(0);
+
+    const [voteChanged, setVoteChanged] = useState(0);
 
     async function follow() {
         try {
@@ -108,7 +113,9 @@ export default function ProfilePageContent({ handle }) {
                 functionName: "getPublication",
                 args: [id],
             });
-            setDisplayedPosts((posts) => [...posts, <Post publication={data} key={id}/>]);
+            if (!data.isCommentOfID) {
+                setDisplayedPosts((posts) => [...posts, <Post publication={data} key={id}/>]);
+            }
         } 
         catch (err) {
             console.log(err);
@@ -128,7 +135,7 @@ export default function ProfilePageContent({ handle }) {
         async function call2() { await doesFollow() };
         call();
         call2();
-    }, []);
+    }, [nameChange]);
 
     useEffect(() => {
         if (user.postsIDs && !noSecondCall) {
@@ -148,10 +155,11 @@ export default function ProfilePageContent({ handle }) {
         <>
             <>{user.name}</>
             <>{handle}</>
+            {user.SFTIDs.length > 0 ? <DisplaySFTs user={user}/> : <></>}
             <>Score : {user.score.toString()}</>
             <Link href={`/profile/${handle}/followers`}>{user.followersList.number.toString()} followers</Link>
             <Link href={`/profile/${handle}/followings`}>{user.followingsList.number.toString()} followings</Link>
-            {isUser ? <ChangeName/> : <></>}
+            {isUser ? <ChangeName setNameChange={setNameChange}/> : <></>}
             {isUser ? <></> : <>{isFollowing ? <Button onClick={unfollow}>Unfollow</Button> : <Button onClick={follow}>Follow</Button>}</>}
             <>{displayedPosts}</>
         </>

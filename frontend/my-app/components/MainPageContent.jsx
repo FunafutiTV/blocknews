@@ -24,6 +24,8 @@ export default function MainPageContent() {
 
     const [lastPostID, setLastPostID] = useState(0);
 
+    const [newPost, setNewPost] = useState(0);
+
     async function retrievePost(id) {
         try {
             const data = await readContract({
@@ -59,7 +61,7 @@ export default function MainPageContent() {
         setIsLoading(true);
         const call = async () => {await retrieveLastPostID()};
         call();
-    }, []);
+    }, [newPost]);
 
     useEffect(() => {
         const fetchPost = async(id) => {await retrievePost(id)};
@@ -79,7 +81,7 @@ export default function MainPageContent() {
 
     return(
     <>
-        <Publish/>
+        <Publish setNewPost={setNewPost}/>
         {displayedPosts}
     </>
     )

@@ -17,6 +17,8 @@ export default function Post({ publication }) {
     const [vote, setVote] = useState(0);
 
     const [refreshArrows, setRefreshArrows] = useState(0); 
+
+    const [posterName, setPosterName] = useState("");
     // const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZone: 'UTC' };
     // const dateObj = new Date(publication.createdAt);
 
@@ -29,6 +31,21 @@ export default function Post({ publication }) {
                 args: [address, publication.id],
             });
             setVote(data);
+        } 
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    async function getUsername() {
+        try {
+            const data = await readContract({
+                address: contractAddress,
+                abi: abi,
+                functionName: "getUser",
+                args: [publication.poster],
+            });
+            setPosterName(data.name);
         } 
         catch (err) {
             console.log(err);
@@ -80,6 +97,11 @@ export default function Post({ publication }) {
         call();
     }, [refreshArrows])
 
+    useEffect(() => {
+        const call = async() => {await getUsername()};
+        call();
+    }, [])
+
     if (!publication.exists) {
         return <>Error</>
     }
@@ -88,7 +110,10 @@ export default function Post({ publication }) {
         <Box maxW="md" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="md" p={4} mb={4}>
             <Box display="flex" alignItems="center" mb={2}>
                 {/* <Image src={publication.by.metadata?.picture?.raw.uri || '/default.png'} boxSize="40px" borderRadius="full" mr={2}/> */}
-                <Link href={`/profile/${publication.poster}`} fontWeight="bold">{publication.poster}</Link>
+                <Link href={`/profile/${publication.poster}`} fontWeight="bold">
+                    { posterName ? <Text>{posterName}</Text> : <></>}
+                    <Text>{publication.poster}</Text>
+                </Link>
             </Box>
             <Link href={`/post/${publication.id}`}>
                 <Text mb={4}>{publication.content}</Text>

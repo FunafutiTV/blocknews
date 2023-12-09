@@ -11,8 +11,10 @@ import { abi, contractAddress } from '@/constants';
 
 import { useState, useEffect } from 'react';
 
-export default function Publish() {
+export default function Publish({ setNewPost }) {
     const [value, setValue] = useState("");
+
+    const toast = useToast();
 
     async function post(content) {
         try {
@@ -26,6 +28,7 @@ export default function Publish() {
             const data = await waitForTransaction({
                 hash: hash,
             })
+            setNewPost(i => i + 1);
             toast({
                 title: 'Congratulations',
                 description: "Succesfully published post.",
@@ -47,7 +50,10 @@ export default function Publish() {
     };
 
     return(
-        <form onSubmit={() => post(value)}>
+        <form onSubmit={(e) => {
+            e.preventDefault(); 
+            post(value);
+            setValue("")}}>
             <Input type="text" value={value} onChange={(e) => setValue(e.target.value)} maxLength={300}/>
             <button type="submit">Publish</button>
         </form>

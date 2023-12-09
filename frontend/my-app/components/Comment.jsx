@@ -11,10 +11,12 @@ import { abi, contractAddress } from '@/constants';
 
 import { useState, useEffect } from 'react';
 
-export default function Publish({ id }) {
+export default function Comment({ id, setNewComment }) {
     const [value, setValue] = useState("");
 
-    async function post(content) {
+    const toast = useToast();
+
+    async function comment(content) {
         try {
             const { request } = await prepareWriteContract({
                 address: contractAddress,
@@ -26,6 +28,7 @@ export default function Publish({ id }) {
             const data = await waitForTransaction({
                 hash: hash,
             })
+            setNewComment(i => i + 1);
             toast({
                 title: 'Congratulations',
                 description: "Succesfully published comment.",
@@ -47,7 +50,10 @@ export default function Publish({ id }) {
     };
 
     return(
-        <form onSubmit={() => post(value)}>
+        <form onSubmit={(e) => {
+            e.preventDefault();
+            comment(value);
+            setValue("")}}>
             <Input type="text" value={value} onChange={(e) => setValue(e.target.value)} maxLength={300}/>
             <button type="submit">Publish</button>
         </form>

@@ -35,6 +35,7 @@ contract SocialNetwork is Ownable {
         FollowList followingsList;
         FollowList followersList;
         uint[] postsIDs;
+        uint[] SFTIDs;
     }
 
     mapping (uint => mapping (address => int)) monthlyProfileScore;
@@ -43,7 +44,7 @@ contract SocialNetwork is Ownable {
     mapping (address => mapping (address => Follow)) follows;
     mapping (address => User) userByAddress;
     
-    address[3] topUsers;
+    address[10] topUsers;
     uint public month = 202312;
     uint public nextUnusedPublicationID = 1;
     
@@ -58,7 +59,6 @@ contract SocialNetwork is Ownable {
     event NewTopUser(address newTopUser, address previousTopUser);
     event Followed(address follower, address followed);
     event Unfollowed(address follower, address followed);
-    event RewardedUser(address user, uint month);
 
 
     constructor() Ownable(msg.sender) {}
@@ -66,10 +66,6 @@ contract SocialNetwork is Ownable {
     modifier publicationExists(uint _publicationID) {
         require(postByID[_publicationID].exists, "Publication with given ID does not exist");
         _;
-    }
-
-    function getProfileScore(address _user) external view returns (int) {
-        return userByAddress[_user].score;
     }
 
     function getMonthlyProfileScore(address _user, uint _month) external view returns (int) {
@@ -90,27 +86,15 @@ contract SocialNetwork is Ownable {
         return userByAddress[_user];
     }
 
-    function hasBeenRewarded(address _user, uint _month) external view returns (bool) {
+    function hasBeenRewarded(address _user, uint _month) public view returns (bool) {
         uint SFTnumber = topUsersSFT.balanceOf(_user, _month);
         require(SFTnumber < 2, "Error. The user shouldn't have more than one SFT for a month.");
         if (SFTnumber == 1) return true;
         else return false;
     }
 
-    function getFollowingsList(address _user) external view returns (address[] memory) {
-        return userByAddress[_user].followingsList.followList;
-    }
-
-    function getFollowersList(address _user) external view returns (address[] memory) {
-        return userByAddress[_user].followersList.followList;
-    }
-
-    function getFollowingsNumber(address _user) external view returns (uint) {
-        return userByAddress[_user].followingsList.number;
-    }
-
-    function getFollowersNumber(address _user) external view returns (uint) {
-        return userByAddress[_user].followersList.number;
+    function getSFTURI() external view returns (string memory) {
+        return topUsersSFT.uri(202312);
     }
 
     function upvoteOrDownvote(address _user, uint _publicationID) public publicationExists(_publicationID) view returns (uint) {
@@ -155,7 +139,6 @@ contract SocialNetwork is Ownable {
     }
 
     function changeName(string calldata _newName) external {
-        require(bytes(_newName).length != 0, "Name must not be empty");
         require(bytes(_newName).length <= 24, "Name must not be longer than 24 characters");
         string memory previousName = userByAddress[msg.sender].name;
         userByAddress[msg.sender].name = _newName;
@@ -167,16 +150,16 @@ contract SocialNetwork is Ownable {
         require(bytes(_content).length != 0, "Publication can't be empty");
         require(bytes(_content).length <= 300, "Publications are limited to 300 characters");
         uint _publicationID = nextUnusedPublicationID;
-        postByID[_publicationID].exists = true;
-        postByID[_publicationID].id = _publicationID;
-        postByID[_publicationID].poster = msg.sender;
-        postByID[_publicationID].content = _content;
-        userByAddress[msg.sender].postsIDs.push(_publicationID);
         if (_parentPostID != 0) {
             require(postByID[_parentPostID].exists, "Parent post doesn't exist");
             postByID[_publicationID].isCommentOfID = _parentPostID;
             postByID[_parentPostID].commentsIDs.push(_publicationID);
         }
+        postByID[_publicationID].exists = true;
+        postByID[_publicationID].id = _publicationID;
+        postByID[_publicationID].poster = msg.sender;
+        postByID[_publicationID].content = _content;
+        userByAddress[msg.sender].postsIDs.push(_publicationID);
         ++nextUnusedPublicationID;
         emit NewPost(_publicationID, msg.sender);
     }
@@ -233,7 +216,7 @@ contract SocialNetwork is Ownable {
 
     function follow(address _followed) public {
         require(_followed != msg.sender, "You can't follow yourself");
-        require(!follows[msg.sender][_followed].follows, "You already follow this address");
+        require(!follows[msg.sender][_followed].follows, "You already follow this user");
         follows[msg.sender][_followed].follows = true;
         userByAddress[msg.sender].followingsList.followList.push(_followed);
         ++userByAddress[msg.sender].followingsList.number;
@@ -246,7 +229,7 @@ contract SocialNetwork is Ownable {
 
     function unfollow(address _unfollowed) public {
         require(_unfollowed != msg.sender, "You can't unfollow yourself");
-        require(follows[msg.sender][_unfollowed].follows, "You don't follow this address");
+        require(follows[msg.sender][_unfollowed].follows, "You don't follow this user");
         follows[msg.sender][_unfollowed].follows = false;
         uint positionInFollowingsArray = follows[msg.sender][_unfollowed].positionInFollowingsArray;
         uint positionInFollowersArray = follows[msg.sender][_unfollowed].positionInFollowersArray;
@@ -260,14 +243,15 @@ contract SocialNetwork is Ownable {
     function rewardTopUsers() public onlyOwner {
         for(uint i = 0; i < topUsers.length; i++) {
             if (topUsers[i] != address(0)) {
+                require(!hasBeenRewarded(topUsers[i], month), "This user has already been rewarded");
                 topUsersSFT.mintOne(topUsers[i], month);
-                emit RewardedUser(topUsers[i], month);
+                userByAddress[topUsers[i]].SFTIDs.push(month);
             }
         }
         if (month % 100 == 12) {
             month += 89;
         } else {
-            month += 1;
+            ++month;
         }
     }
 }

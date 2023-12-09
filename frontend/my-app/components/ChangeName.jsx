@@ -11,8 +11,10 @@ import { abi, contractAddress } from '@/constants';
 
 import { useState, useEffect } from 'react';
 
-export default function ChangeName() {
+export default function ChangeName({ setNameChange }) {
     const [value, setValue] = useState("");
+
+    const toast = useToast();
 
     async function changeName(name) {
         try {
@@ -26,6 +28,7 @@ export default function ChangeName() {
             const data = await waitForTransaction({
                 hash: hash,
             })
+            setNameChange(i => i + 1);
             toast({
                 title: 'Congratulations',
                 description: "Succesfully changed name.",
@@ -47,7 +50,10 @@ export default function ChangeName() {
     };
 
     return(
-        <form onSubmit={() => changeName(value)}>
+        <form onSubmit={(e) => {
+            e.preventDefault();
+            changeName(value)
+            setValue("")}}>
             <Input type="text" value={value} onChange={(e) => setValue(e.target.value)} maxLength={24}/>
             <button type="submit">Change name</button>
         </form>

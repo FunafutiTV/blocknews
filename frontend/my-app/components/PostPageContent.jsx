@@ -21,6 +21,8 @@ export default function PostPageContent({ id }) {
 
     const [noSecondCall, setNoSecondCall] = useState(false);
 
+    const [newComment, setNewComment] = useState(0);
+
     async function retrievePost() {
         try {
             const data = await readContract({
@@ -73,7 +75,7 @@ export default function PostPageContent({ id }) {
     useEffect(() => {
         async function call() { await retrievePost() };
         call();
-    }, [])
+    }, [newComment])
 
     useEffect(() => {
         async function call() { await retrieveParent(publication.isCommentOfID) };
@@ -98,7 +100,7 @@ export default function PostPageContent({ id }) {
         <>
             {parent.exists ? <Post publication={parent}/> : <></>}
             <Post publication={publication}/>
-            <Comment id={publication.id}/>
+            <Comment id={publication.id} setNewComment={setNewComment}/>
             {displayedComments}
         </>
     )

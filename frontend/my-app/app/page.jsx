@@ -1,7 +1,7 @@
 'use client'
 // Components
-import Header from "@/components/Header"
-import MainPageContent from "@/components/MainPageContent"
+import Header from "../components/Header"
+import MainPageContent from "../components/MainPageContent"
 import { Box } from "@chakra-ui/react"
 import { useContext } from 'react'
 

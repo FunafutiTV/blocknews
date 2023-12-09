@@ -1,5 +1,5 @@
 'use client'
-import Header from "@/components/Header"
+import Header from "../../../components/Header"
 import PostPageContent from "../../../components/PostPageContent";
 
 import { Box } from "@chakra-ui/react"

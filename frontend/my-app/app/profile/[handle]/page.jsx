@@ -1,5 +1,5 @@
 'use client'
-import Header from "@/components/Header"
+import Header from "../../../components/Header"
 import ProfilePageContent from "../../../components/ProfilePageContent";
 
 import { Box } from "@chakra-ui/react"

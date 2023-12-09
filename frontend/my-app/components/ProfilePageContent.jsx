@@ -32,8 +32,6 @@ export default function ProfilePageContent({ handle }) {
 
     const [nameChange, setNameChange] = useState(0);
 
-    const [voteChanged, setVoteChanged] = useState(0);
-
     async function follow() {
         try {
             const { request } = await prepareWriteContract({

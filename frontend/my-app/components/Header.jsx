@@ -29,7 +29,6 @@ export default function Header() {
     const toast = useToast();
 
     async function checkIsOwner() {
-
         try {
             const data = await readContract({
                 address: contractAddress,

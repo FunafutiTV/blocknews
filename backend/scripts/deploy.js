@@ -7,7 +7,7 @@ async function main() {
   await socialNetwork.waitForDeployment();
 
   console.log(
-    `Voting deployed to ${socialNetwork.target}`
+    `SocialNetwork deployed to ${socialNetwork.target}`
   );
 }
 

@@ -21,7 +21,7 @@ import { createContext, useState } from 'react';
 // :::::::::::::::::::::::CONFIGURATION:::::::::::::::::::::::::::::::
 
 const { chains, publicClient } = configureChains(
-  [hardhat, sepolia],
+  [hardhat, /*sepolia*/],
   [
       alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_ID }),
       publicProvider()

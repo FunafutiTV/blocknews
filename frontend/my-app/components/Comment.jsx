@@ -1,21 +1,26 @@
 'use client'
+
 // ChakraUI
-import { Flex, Box, Textarea, Button, useToast, Text, Spinner } from '@chakra-ui/react';
+import { Flex, Box, Textarea, Button, useToast, Text } from '@chakra-ui/react';
 
 // Wagmi
-import { prepareWriteContract, writeContract, waitForTransaction, readContract } from '@wagmi/core';
-import { useAccount, usePublicClient } from 'wagmi';
+import { prepareWriteContract, writeContract, waitForTransaction } from '@wagmi/core';
 
 // Contracts informations
 import { abi, contractAddress } from '../constants';
 
-import { useState, useEffect } from 'react';
+// React
+import { useState } from 'react';
 
 export default function Comment({ id, setNewComment }) {
+
+    // State
     const [value, setValue] = useState("");
 
+    // Chakra toast
     const toast = useToast();
 
+    // Smart contract call to post function
     async function comment(content) {
         try {
             const { request } = await prepareWriteContract({
@@ -28,7 +33,7 @@ export default function Comment({ id, setNewComment }) {
             const data = await waitForTransaction({
                 hash: hash,
             })
-            setNewComment(i => i + 1);
+            setNewComment(i => i + 1); // Will trigger a useEffect in PostPageContent to display the new comment in real time
             toast({
                 title: 'Congratulations',
                 description: "Succesfully published comment.",

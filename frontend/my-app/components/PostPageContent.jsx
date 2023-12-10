@@ -1,30 +1,32 @@
 'use client'
+
+// Components
 import Post from "./Post";
 import Comment from "./Comment";
 
+// Chakra UI
 import { Box, Text, Spinner } from "@chakra-ui/react";
 
+// Wagmi
 import { readContract } from '@wagmi/core';
 
 // Contracts informations
 import { abi, contractAddress } from '../constants';
 
+// React
 import { useState, useEffect } from 'react';
 
 export default function PostPageContent({ id }) {
 
+    // States
     const [isLoading, setIsLoading] = useState(true);
-
     const [publication, setPublication] = useState({});
-
     const [parent, setParent] = useState({});
-
     const [displayedComments, setDisplayedComments] = useState([]);
-
     const [noSecondCall, setNoSecondCall] = useState(false);
-
     const [newComment, setNewComment] = useState(0);
 
+    // Smart contract call to getPublication function (to retrieve the main post)
     async function retrievePost() {
         try {
             const data = await readContract({
@@ -42,6 +44,7 @@ export default function PostPageContent({ id }) {
         }
     }
 
+    // Smart contract call to getPublication function (to retrieve the parent post, if it exists)
     async function retrieveParent(_id) {
         try {
             const data = await readContract({
@@ -59,6 +62,7 @@ export default function PostPageContent({ id }) {
         }
     }
 
+    // Smart contract call to getPublication (to retrieve the main post's comments)
     async function retrieveComment(id) {
         try {
             const data = await readContract({
@@ -74,11 +78,13 @@ export default function PostPageContent({ id }) {
         }
     }
 
+    // First useEffect
     useEffect(() => {
         async function call() { await retrievePost() };
         call();
     }, [newComment])
 
+    // Second useEffect
     useEffect(() => {
         async function call() { await retrieveParent(publication.isCommentOfID) };
         if (publication.isCommentOfID) {

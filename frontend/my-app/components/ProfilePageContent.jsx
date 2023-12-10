@@ -1,37 +1,41 @@
 'use client'
 
+// Components
 import ChangeName from './ChangeName';
 import Post from './Post';
 import DisplaySFTs from './DisplaySFTs';
 
+// React
 import { useState, useEffect } from 'react';
 
+// Wagmi
 import { readContract, prepareWriteContract, writeContract, waitForTransaction } from '@wagmi/core';
-import { useAccount, usePublicClient } from 'wagmi';
+import { useAccount } from 'wagmi';
 
+// Contracts informations
 import { abi, contractAddress } from '../constants';
+
+// Chakra UI
 import { Button, Spinner, Box, Flex, Grid, GridItem, Text, Link as ChakraLink } from '@chakra-ui/react';
 
+// NextJS
 import Link from 'next/link'
 
 export default function ProfilePageContent({ handle }) {
 
+    // Account
     const address = useAccount();
 
+    // States
     const [user, setUser] = useState({})
-
     const [isLoading, setIsLoading] = useState(true);
-
     const [isUser, setIsUser] = useState(false);
-
     const [isFollowing, setIsFollowing] = useState(false);
-
     const [displayedPosts, setDisplayedPosts] = useState([]);
-
     const [noSecondCall, setNoSecondCall] = useState(false);
-
     const [nameChange, setNameChange] = useState(0);
 
+    // Smart contract call to follow function
     async function follow() {
         try {
             const { request } = await prepareWriteContract({
@@ -51,6 +55,7 @@ export default function ProfilePageContent({ handle }) {
         }  
     };
 
+    // Smart contract call to unfollow function
     async function unfollow() {
         try {
             const { request } = await prepareWriteContract({
@@ -70,7 +75,7 @@ export default function ProfilePageContent({ handle }) {
         }  
     };
 
-
+    // Smart contract call to doesFollow function
     async function doesFollow() {
         try {
             const data = await readContract({
@@ -86,6 +91,7 @@ export default function ProfilePageContent({ handle }) {
         }
     }
 
+    // Smart contract call to getUser function
     async function retrieveUser() {
         try {
             const data = await readContract({
@@ -103,6 +109,7 @@ export default function ProfilePageContent({ handle }) {
         }
     }
 
+    // Smart contract call to getPublication function
     async function retrievePost(id) {
         try {
             const data = await readContract({
@@ -120,6 +127,7 @@ export default function ProfilePageContent({ handle }) {
         }
     }
 
+    // useEffect to determine if the current user is the user displayed on the page
     useEffect(() => {
         if (address.address === handle) {
             setIsUser(true);
@@ -128,6 +136,7 @@ export default function ProfilePageContent({ handle }) {
         }
     }, [address])
 
+    // First useEffect
     useEffect(() => {
         async function call() { await retrieveUser() };
         async function call2() { await doesFollow() };
@@ -135,6 +144,7 @@ export default function ProfilePageContent({ handle }) {
         call2();
     }, [nameChange]);
 
+    // Second useEffect
     useEffect(() => {
         if (user.postsIDs && !noSecondCall) {
             setNoSecondCall(true);

@@ -1,27 +1,32 @@
 'use client'
+
+// Chakra UI
 import { Box, Text, Image, Button } from '@chakra-ui/react'
+
+// NextJS
 import Link from 'next/link'
 
+// Contracts informations
 import { abi, contractAddress } from '../constants';
 
+// React
 import { useState, useEffect } from 'react'
 
+// Wagmi
 import { prepareWriteContract, writeContract, waitForTransaction, readContract } from '@wagmi/core';
-
-import { useSignMessage, useAccount } from 'wagmi'
+import { useAccount } from 'wagmi'
 
 export default function Post({ publication }) {
     
+    // Account
     const { address } = useAccount();
 
+    // States
     const [vote, setVote] = useState(0);
-
     const [refreshArrows, setRefreshArrows] = useState(0); 
-
     const [posterName, setPosterName] = useState("");
-    // const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZone: 'UTC' };
-    // const dateObj = new Date(publication.createdAt);
 
+    // Smart contract call to upvoteOrDownvote function
     async function getVote() {
         try {
             const data = await readContract({
@@ -37,6 +42,7 @@ export default function Post({ publication }) {
         }
     }
 
+    // Smart contract call to getUser function
     async function getUsername() {
         try {
             const data = await readContract({
@@ -52,6 +58,7 @@ export default function Post({ publication }) {
         }
     }
 
+    // Smart contract call to upvote function
     async function upvote() {
         try {
             const { request } = await prepareWriteContract({
@@ -65,13 +72,14 @@ export default function Post({ publication }) {
                 hash: hash,
             })
             console.log("Upvoted successfully")
-            setRefreshArrows((i) => i + 1);
+            setRefreshArrows((i) => i + 1); // Triggers a useEffect to color the vote arrows in real time
         }
         catch(err) {
             console.log(err.message)
         }  
     };
 
+    // Smart contract call to downvote function
     async function downvote() {
         try {
             const { request } = await prepareWriteContract({
@@ -85,18 +93,20 @@ export default function Post({ publication }) {
                 hash: hash,
             })
             console.log("Downvoted successfully")
-            setRefreshArrows((i) => i + 1);
+            setRefreshArrows((i) => i + 1); // Triggers a useEffect to color the vote arrows in real time
         }
         catch(err) {
             console.log(err.message)
         }  
     };
 
+    // useEffect to get the current user's vote
     useEffect(() => {
         const call = async() => {await getVote()};
         call();
     }, [refreshArrows])
 
+    // useEffect to get the poster's name
     useEffect(() => {
         const call = async() => {await getUsername()};
         call();

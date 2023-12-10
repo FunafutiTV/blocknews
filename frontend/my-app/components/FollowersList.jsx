@@ -1,28 +1,33 @@
 'use client'
 
+// Wagmi
 import { readContract } from '@wagmi/core';
 
+// React
 import { useState, useEffect } from 'react';
 
+// Contracts informations
 import { abi, contractAddress } from '../constants';
 
+// NextJS
 import Link from 'next/link';
 import Image from 'next/image';
 
+// Chakra UI
 import { Link as ChakraLink, Box, Spinner } from "@chakra-ui/react";
 
+// Component
 import Profile from "./Profile";
 
 export default function FollowersList({ handle }) {
     
+    // States
     const [isLoading, setIsLoading] = useState(true);
-
     const [user, setUser] = useState({});
-
     const [displayedUsers, setDisplayedUsers] = useState([]);
-
     const [noSecondCall, setNoSecondCall] = useState(false);
 
+    // Smart contract call to getUser function (to retrieve the main user)
     async function retrieveUser() {
         try {
             const data = await readContract({
@@ -38,8 +43,9 @@ export default function FollowersList({ handle }) {
         }
     }
 
+    // Smart contract call to getUser function (to retrieve the main user's followers)
     async function retrieveFollower(address) {
-        if (address !== "0x0000000000000000000000000000000000000000") {
+        if (address !== "0x0000000000000000000000000000000000000000") { // Exclude address 0 (not a real user)
             try {
                 const data = await readContract({
                     address: contractAddress,
@@ -55,11 +61,13 @@ export default function FollowersList({ handle }) {
         }
     }
 
+    // First useEffect
     useEffect(() => {
         async function call() { await retrieveUser() };
         call();
     }, [])
 
+    // Second useEffect
     useEffect(() => {
         const fetchFollower = async(address) => {retrieveFollower(address)}
         if (user.followersList && !noSecondCall) {
@@ -71,8 +79,6 @@ export default function FollowersList({ handle }) {
             setIsLoading(false);
         }
     }, [user])
-
-    if (isLoading) return <>Spinner</>
     
     return(
         <Box>

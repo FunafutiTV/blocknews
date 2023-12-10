@@ -1,7 +1,9 @@
 'use client'
 
+// NextJS
 import Link from 'next/link'
 
+// Chakra UI
 import { Link as ChakraLink, Box, Text } from "@chakra-ui/react";
 
 export default function Profile({ profile, handle }) {

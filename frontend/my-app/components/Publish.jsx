@@ -1,21 +1,26 @@
 'use client'
+
 // ChakraUI
 import { Flex, Box, Text, Button, useToast, Textarea } from '@chakra-ui/react';
 
 // Wagmi
 import { prepareWriteContract, writeContract, waitForTransaction, readContract } from '@wagmi/core';
-import { useAccount, usePublicClient } from 'wagmi';
 
 // Contracts informations
 import { abi, contractAddress } from '../constants';
 
-import { useState, useEffect } from 'react';
+// React
+import { useState } from 'react';
 
 export default function Publish({ setNewPost }) {
+    
+    // State
     const [value, setValue] = useState("");
 
+    // Chakra toast
     const toast = useToast();
 
+    // Smart contract call to post function
     async function post(content) {
         try {
             const { request } = await prepareWriteContract({
@@ -28,7 +33,7 @@ export default function Publish({ setNewPost }) {
             const data = await waitForTransaction({
                 hash: hash,
             })
-            setNewPost(i => i + 1);
+            setNewPost(i => i + 1); // Will trigger a useEffect in HomeFeed and ExploreFeed to display the new post in real time
             toast({
                 title: 'Congratulations',
                 description: "Succesfully published post.",

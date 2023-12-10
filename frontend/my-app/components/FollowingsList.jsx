@@ -1,29 +1,33 @@
 'use client'
 
+// Wagmi
 import { readContract } from '@wagmi/core';
 
+// React
 import { useState, useEffect } from 'react';
 
+// Contracts informations
 import { abi, contractAddress } from '../constants';
 
+// NextJS
 import Link from 'next/link';
-
 import Image from 'next/image';
 
+// Chakra UI
 import { Link as ChakraLink, Box, Spinner } from "@chakra-ui/react";
 
+// Component
 import Profile from "./Profile";
 
 export default function FollowingsList({ handle }) {
     
+    // States
     const [isLoading, setIsLoading] = useState(true);
-
     const [user, setUser] = useState({});
-
     const [displayedUsers, setDisplayedUsers] = useState([]);
-
     const [noSecondCall, setNoSecondCall] = useState(false);
 
+    // Smart contract call to getUser function (to retrieve the main user)
     async function retrieveUser() {
         try {
             const data = await readContract({
@@ -39,6 +43,7 @@ export default function FollowingsList({ handle }) {
         }
     }
 
+    // Smart contract call to getUser function (to retrieve the main user's followings)
     async function retrieveFollowing(address) {
         if (address !== "0x0000000000000000000000000000000000000000") {
             try {
@@ -56,11 +61,13 @@ export default function FollowingsList({ handle }) {
         }
     }
 
+    // First useEffect
     useEffect(() => {
         async function call() { await retrieveUser() };
         call();
     }, [])
 
+    // Second useEffect
     useEffect(() => {
         const fetchFollowing = async(address) => {retrieveFollowing(address)}
         if (user.followingsList && !noSecondCall) {

@@ -1,21 +1,25 @@
 'use client'
 
+// React
 import { useState, useEffect } from 'react';
 
+// Wagmi
 import { readContract } from '@wagmi/core';
 
+// Contract informations
 import { abi, contractAddress } from '../constants';
 
+// Chakra UI
 import { Box, Image, Flex, Spinner } from '@chakra-ui/react'; 
 
 export default function DisplaySFTs({ user }) {
 
+    // States
     const [uri, setURI] = useState("");
-
     const [displayedSFTs, setDisplayedSFTs] = useState([])
-
     const [isLoading, setIsLoading] = useState(true);
 
+    // Smart contract call to getSFTURI function
     async function getURI() {
         try {
             const data = await readContract({
@@ -32,11 +36,13 @@ export default function DisplaySFTs({ user }) {
         }
     }
 
+    // First useEffect
     useEffect(() => {
         const call = async() => {await getURI()};
         call();
     }, [])
 
+    // Second useEffect
     useEffect(() => {
         if (uri) {
             user.SFTIDs.forEach((sft, i) => {

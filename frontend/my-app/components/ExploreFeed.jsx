@@ -1,23 +1,28 @@
 'use client'
 
+// Component
 import Post from "./Post";
 
+// Wagmi
 import { readContract } from '@wagmi/core';
 
+// Chakra UI
 import { Box, Spinner } from "@chakra-ui/react";
 
+// React
 import { useState, useEffect } from 'react';
 
+// Contracts informations
 import { abi, contractAddress } from '../constants';
 
 export default function ExploreFeed({ newPost }) {
 
+    // States
     const [isLoading, setIsLoading] = useState(true);
-
     const [displayedPosts, setDisplayedPosts] = useState([]);
-
     const [lastPostID, setLastPostID] = useState(0);
 
+    // Smart contract call to getPublication function
     async function retrievePost(id) {
         try {
             const data = await readContract({
@@ -35,6 +40,7 @@ export default function ExploreFeed({ newPost }) {
         }
     }
 
+    // Smart contract call to nextUnusedPublicationID public variable
     async function retrieveLastPostID() {
         try {
             const data = await readContract({
@@ -49,12 +55,14 @@ export default function ExploreFeed({ newPost }) {
         }
     }
 
+    // First useEffect
     useEffect(() => {
         setIsLoading(true);
         const call = async () => {await retrieveLastPostID()};
         call();
     }, [newPost]);
 
+    // Second useEffect
     useEffect(() => {
         const fetchPost = async(id) => {await retrievePost(id)};
         setDisplayedPosts([]);

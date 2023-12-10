@@ -1,33 +1,43 @@
 'use client'
+
 // RainbowKit
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-
-import Link from 'next/link';
 
 // ChakraUI
 import { Flex, Button, useToast, Text } from "@chakra-ui/react";
 
 // Nextjs
 import Image from "next/image";
+import Link from 'next/link';
 
+// React & context
 import { useState, useEffect, useContext } from 'react';
+import { StateContext } from "../app/layout"
 
+// Contracts informations
 import { abi, contractAddress } from '../constants';
 
+// Wagmi
 import { readContract, prepareWriteContract, writeContract, waitForTransaction } from '@wagmi/core';
 import { useSignMessage, useAccount } from 'wagmi'
 
-import { StateContext } from "../app/layout"
-
 export default function Header() {
+
+    // Account & Sign message from Wagmi
     const { address } = useAccount();
     const { data, error, isLoading, signMessage } = useSignMessage()
+
+    // Retrieve context
     const { isConnected, setIsConnected } = useContext(StateContext);
+
+    // States
     const [hasMounted, setHasMounted] = useState(false);
     const [isOwner, setIsOwner] = useState(false);
 
+    // Chakra toast
     const toast = useToast();
 
+    // Smart contract call to owner function (from Ownable)
     async function checkIsOwner() {
         try {
             const data = await readContract({
@@ -42,6 +52,7 @@ export default function Header() {
         }
     }
 
+    // Smart contract call to rewardTopUsers function
     async function rewardTopusers() {
         try {
             const { request } = await prepareWriteContract({
@@ -73,10 +84,12 @@ export default function Header() {
         }  
     };
 
+    // First useEffect
     useEffect(() => {
         setTimeout(() => setHasMounted(true), 100);
     }, [])
 
+    // Second useEffect
     useEffect(() => {
         if (hasMounted && address) {
             setIsConnected(false);
@@ -86,12 +99,14 @@ export default function Header() {
         call();
     }, [address]);
 
+    // Third useEffect
     useEffect(() => {
         if (data) {
             setIsConnected(true);
         }
     }, [data])
 
+    // useEffect in case of error with signing
     useEffect(() => {
         if (error) {
             console.log(error);

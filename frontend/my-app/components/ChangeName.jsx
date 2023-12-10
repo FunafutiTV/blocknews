@@ -1,21 +1,26 @@
 'use client'
+
 // ChakraUI
 import { Input, Button, useToast, Box } from '@chakra-ui/react';
 
 // Wagmi
 import { prepareWriteContract, writeContract, waitForTransaction, readContract } from '@wagmi/core';
-import { useAccount, usePublicClient } from 'wagmi';
 
 // Contracts informations
 import { abi, contractAddress } from '../constants';
 
-import { useState, useEffect } from 'react';
+// React
+import { useState } from 'react';
 
 export default function ChangeName({ setNameChange }) {
+    
+    // State
     const [value, setValue] = useState("");
 
+    // Chakra toast
     const toast = useToast();
 
+    // Smart contract call to changeName function
     async function changeName(name) {
         try {
             const { request } = await prepareWriteContract({
@@ -28,7 +33,7 @@ export default function ChangeName({ setNameChange }) {
             const data = await waitForTransaction({
                 hash: hash,
             })
-            setNameChange(i => i + 1);
+            setNameChange(i => i + 1); // Will trigger a useEffect in ProfilePageContent to update the name in real time
             toast({
                 title: 'Congratulations',
                 description: "Succesfully changed name.",
@@ -55,18 +60,9 @@ export default function ChangeName({ setNameChange }) {
             changeName(value)
             setValue("")}}>
             <Box display="flex" alignItems="center" justifyContent="center">
-        <Input
-          type="text"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          maxLength={24}
-          mr={2}
-          placeholder="Enter new name"
-        />
-        <Button type="submit" variant="solid" colorScheme="blue">
-          Change name
-        </Button>
-      </Box>
+                <Input type="text" value={value} onChange={(e) => setValue(e.target.value)} maxLength={24} mr={2} placeholder="Enter new name"/>
+                <Button type="submit" variant="solid" colorScheme="blue">Change name</Button>
+            </Box>
         </form>
     )
 }

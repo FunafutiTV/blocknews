@@ -8,20 +8,21 @@ import './globals.css'
 
 // RainbowKit
 import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
 import '@rainbow-me/rainbowkit/styles.css';
 
 // Wagmi
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
 import { hardhat, sepolia } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
+import { alchemyProvider } from 'wagmi/providers/alchemy';
 
+// React
 import { createContext, useState } from 'react';
 
 // :::::::::::::::::::::::CONFIGURATION:::::::::::::::::::::::::::::::
 
 const { chains, publicClient } = configureChains(
-  [hardhat, /*sepolia*/],
+  [/*hardhat,*/ sepolia],
   [
       alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_ID }),
       publicProvider()

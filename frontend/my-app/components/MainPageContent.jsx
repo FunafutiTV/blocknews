@@ -1,19 +1,23 @@
 'use client'
+
 // ChakraUI
 import { Flex, VStack, Button, useToast } from '@chakra-ui/react';
 
+// Components
 import Publish from "./Publish";
 import ExploreFeed from "./ExploreFeed";
 import HomeFeed from "./HomeFeed";
 
-import { useState, useEffect } from 'react';
+// React
+import { useState } from 'react';
 
 export default function MainPageContent() {
 
+    // Chakra toast
     const toast = useToast();
 
+    // States
     const [newPost, setNewPost] = useState(0);
-
     const [isHome, setIsHome] = useState(true);
 
     return(

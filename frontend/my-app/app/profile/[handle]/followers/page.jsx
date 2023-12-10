@@ -1,14 +1,19 @@
 'use client'
+
+// Components
 import Header from "../../../../components/Header"
 import FollowersList from "../../../../components/FollowersList";
 
+// Chakra UI
 import { Box, Text, Flex } from "@chakra-ui/react"
-import { useContext } from 'react'
 
+// React & context
+import { useContext } from 'react'
 import { StateContext } from "../../../layout"
 
 export default function Home({ params: { handle }}) {
 
+  // Retrieve context
   const { isConnected, setIsConnected } = useContext(StateContext);
 
   return (

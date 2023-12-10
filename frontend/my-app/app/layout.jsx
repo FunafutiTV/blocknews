@@ -46,6 +46,10 @@ export default function RootLayout({ children }) {
   const [isConnected, setIsConnected] = useState(false);
   return (
     <html lang="en">
+      <head>
+        <title>Block News</title>
+        <link rel="icon" href="/icon.png" type="image/x-icon"/>
+      </head>
       <body>
         <WagmiConfig config={wagmiConfig}>
           <RainbowKitProvider chains={chains}>

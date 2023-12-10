@@ -6,7 +6,7 @@ import { readContract } from '@wagmi/core';
 
 import { abi, contractAddress } from '../constants';
 
-import { Box, Image } from '@chakra-ui/react'; 
+import { Box, Image, Flex, Spinner } from '@chakra-ui/react'; 
 
 export default function DisplaySFTs({ user }) {
 
@@ -44,9 +44,11 @@ export default function DisplaySFTs({ user }) {
                 fetch(currentURI)
                     .then(res => res.json()).then(data => {
                         setDisplayedSFTs((sfts) => [...sfts, 
-                            <Box key={i}>
-                                {data.name}
-                                <Image src={data.image}/>
+                            <Box key={i} textAlign="center" maxW="200px">
+                                <Box position="relative" mb={2}>
+                                    <Image src={data.image} height="auto" width="100%" maxH="120px" objectFit="contain" mb={2}/>
+                                    <Box position="absolute" bottom="-34px" left="0" right="0" bg="white" fontSize="8px" fontWeight="bold" py={1}>{data.name}</Box>
+                                </Box>
                             </Box>
                         ]);
                     })
@@ -55,9 +57,9 @@ export default function DisplaySFTs({ user }) {
         }
     }, [uri])
 
-    if (isLoading) return <>Spinner</>
-
     return(
-        <>{displayedSFTs}</>
+        <Flex flexWrap="wrap" justify="center" gap={4}>
+            {isLoading ? <Spinner/> : <>{displayedSFTs}</>}
+        </Flex>
     )
 }

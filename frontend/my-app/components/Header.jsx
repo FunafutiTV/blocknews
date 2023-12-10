@@ -5,7 +5,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from 'next/link';
 
 // ChakraUI
-import { Flex, Button, useToast } from "@chakra-ui/react";
+import { Flex, Button, useToast, Text } from "@chakra-ui/react";
 
 // Nextjs
 import Image from "next/image";
@@ -100,13 +100,15 @@ export default function Header() {
     }, [error])
 
     return (
-        <Flex p="2rem" justifyContent="space-between" alignContent="center">
+        <Flex p="2rem" justifyContent="space-between" align="center" borderBottom="1px solid #ddd">
             <Link href={"/"}>
-                <Image src="/logoBlockNews.jpg" alt="Logo" width={228} height={60}/>
+                <Image src="/logoBlockNews.jpg" alt="Logo" width={228} height={60} />
             </Link>
-            {isConnected ? <Link href={`/profile/${address}`}>My profile</Link> : <></>}
-            {isConnected ? isOwner ? <Button onClick={rewardTopusers}>Reward top users</Button> : <></> : <></>}
-            <ConnectButton />
+            <Flex align="center">
+                {isConnected && (<Link href={`/profile/${address}`}><Text mr="1rem" fontSize="lg" color="blue.600" fontWeight="bold" textDecoration="none" _hover={{ textDecoration: 'underline' }}>My Profile</Text></Link>)}
+                {isConnected && isOwner && (<Button onClick={rewardTopusers} variant="solid" colorScheme="teal" mr="1rem" fontSize="md" fontWeight="bold" _hover={{ bg: 'teal.600' }}>Reward Top Users</Button>)}
+                <ConnectButton />
+            </Flex>
         </Flex>
     )
 };

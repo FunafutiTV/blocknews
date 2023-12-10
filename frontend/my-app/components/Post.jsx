@@ -109,23 +109,19 @@ export default function Post({ publication }) {
     return (
         <Box maxW="md" borderWidth="1px" borderRadius="lg" overflow="hidden" boxShadow="md" p={4} mb={4}>
             <Box display="flex" alignItems="center" mb={2}>
-                {/* <Image src={publication.by.metadata?.picture?.raw.uri || '/default.png'} boxSize="40px" borderRadius="full" mr={2}/> */}
                 <Link href={`/profile/${publication.poster}`} fontWeight="bold">
-                    { posterName ? <Text>{posterName}</Text> : <></>}
-                    <Text>{publication.poster}</Text>
+                    { posterName ? <Text fontSize="lg" color="blue.500">{posterName}</Text> : <></>}
+                    <Text fontSize="sm" color="gray.500">{`${publication.poster.substring(0, 5)}...${publication.poster.substring(publication.poster.length - 5)}`}</Text>
                 </Link>
             </Box>
             <Link href={`/post/${publication.id}`}>
                 <Text mb={4}>{publication.content}</Text>
-                {/* {publication.metadata?.__typename === 'ImageMetadataV3' ? (
-                    <Image src={publication.metadata?.asset?.image?.raw.uri || ''} borderRadius="md" mb={4} alt={publication.metadata?.title} />
-                ) : ""} */}
             </Link>
                 <Box display="flex" alignItems="column">
                     <Button width={5} height={5} padding={0} border="none" background="none"><Image onClick={upvote} src={vote.toString() === "2" ? "/upvotes/upvoted.png" : "/upvotes/notupvoted.png"} alt="upvote" width={5} height={5}/></Button>
                     <Text>{publication.score.toString()}</Text>
                     <Button width={5} height={5} padding={0} border="none" background="none"><Image onClick={() => downvote()} src={vote.toString() === "1" ? "/upvotes/downvoted.png" : "/upvotes/notdownvoted.png"} alt="downvote" width={5} height={5}/></Button>
-                    <Text color="gray.500" fontSize="sm">{publication.commentsIDs.length} comments</Text>
+                    <Text color="gray.500" fontSize="sm">{publication.commentsIDs.length === 0 || publication.commentsIDs.length === 1? `${publication.commentsIDs.length} comment` : `${publication.commentsIDs.length} comments`}</Text>
                 </Box>
           </Box>
     )

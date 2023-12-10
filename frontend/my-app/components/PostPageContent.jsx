@@ -2,6 +2,8 @@
 import Post from "./Post";
 import Comment from "./Comment";
 
+import { Box, Text, Spinner } from "@chakra-ui/react";
+
 import { readContract } from '@wagmi/core';
 
 // Contracts informations
@@ -93,16 +95,29 @@ export default function PostPageContent({ id }) {
             setIsLoading(false);
         }
     }, [publication])
-
-    if (isLoading) return <>Loading</>
     
     return(
-        <>
-            {parent.exists ? <Post publication={parent}/> : <></>}
-            <Post publication={publication}/>
-            <Comment id={publication.id} setNewComment={setNewComment}/>
-            {displayedComments}
-        </>
+        <Box maxW="xl" mx="auto" p={4}>
+            {isLoading ? <Spinner/> : <>
+                {parent.exists && (<Box maxW="80%" borderBottom="1px solid #ddd" p={4} ml={-10} mb={4}>
+                    <Text fontWeight="bold" mb={2}>Parent post</Text>
+                    <Post publication={parent} />
+                </Box>)}
+
+                <Box width="150%">
+                    <Post publication={publication} />
+                </Box>
+
+                <Box borderBottom="1px solid #ddd">
+                    <Comment id={publication.id} setNewComment={setNewComment} mb={4} />
+                </Box>
+
+                {displayedComments.length > 0 && (<Box p={4} maxW="80%" ml={10}>
+                    <Text fontWeight="bold" mb={2}>Comments</Text>
+                    {displayedComments}
+                </Box>)}
+            </>}
+        </Box>
     )
     
 }

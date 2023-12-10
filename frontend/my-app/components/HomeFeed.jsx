@@ -2,6 +2,8 @@
 
 import Post from "./Post";
 
+import { Box, Spinner } from "@chakra-ui/react"
+
 import { readContract } from '@wagmi/core';
 
 import { useState, useEffect } from 'react';
@@ -23,6 +25,8 @@ export default function ExploreFeed({ newPost }) {
     const [displayedPosts, setDisplayedPosts] = useState([]);
 
     const [allPostsFetched, setAllPostsFetched] = useState(false);
+
+    const [hasMounted, setHasMounted] = useState(false);
 
     async function retrieveFollowingsList() {
         try {
@@ -81,7 +85,12 @@ export default function ExploreFeed({ newPost }) {
     }
 
     useEffect(() => {
+        setTimeout(() => setHasMounted(true), 10);
+    }, []);
+
+    useEffect(() => {
         setIsLoading(true);
+        setDisplayedPosts([]);
         setAllPostsFetched(false);
         const call = async() => {await retrieveFollowingsList()};
         call();
@@ -89,12 +98,14 @@ export default function ExploreFeed({ newPost }) {
 
     useEffect(() => {
         const call = async(addr, i) => {await retrievePosts(addr, i)}
-        if (followingsList.length > 0) {
-            followingsList.forEach((user, i) => {
-                call(user, i);
-            })
-        } else {
-            call(address, -2);   
+        if (hasMounted) {
+            if (followingsList.length > 0) {
+                followingsList.forEach((user, i) => {
+                    call(user, i);
+                })
+            } else {
+                call(address, -2);   
+            }
         }
     }, [followingsList]);
 
@@ -112,7 +123,11 @@ export default function ExploreFeed({ newPost }) {
         }
     }, [allPostsFetched]);
 
-    if (isLoading) return(<>Spinner</>)
-
-    return(<>{displayedPosts}</>)
+    return(
+        <Box maxW="xl" w="full" mx="auto">
+            {isLoading ? <Spinner/> :
+                <>{displayedPosts.map((post, index) => (<Box key={index} mb={6}>{post}</Box>))}</>
+            }
+        </Box>
+    )
 }

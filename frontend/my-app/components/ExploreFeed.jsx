@@ -4,6 +4,8 @@ import Post from "./Post";
 
 import { readContract } from '@wagmi/core';
 
+import { Box, Spinner } from "@chakra-ui/react";
+
 import { useState, useEffect } from 'react';
 
 import { abi, contractAddress } from '../constants';
@@ -65,9 +67,11 @@ export default function ExploreFeed({ newPost }) {
         setIsLoading(false);
     }, [lastPostID]);
 
-    if (isLoading) {
-        return <>spinner</>
-    }
-
-    return(<>{displayedPosts}</>)
+    return(
+        <Box maxW="xl" w="full" mx="auto">
+            {isLoading ? <Spinner/> :
+                <>{displayedPosts.map((post, index) => (<Box key={index} mb={6}>{post}</Box>))}</>
+            }
+        </Box>
+    )
 }

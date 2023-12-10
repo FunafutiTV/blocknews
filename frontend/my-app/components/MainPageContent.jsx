@@ -1,6 +1,6 @@
 'use client'
 // ChakraUI
-import { Flex, Alert, AlertIcon, Heading, Input, Button, useToast, Spinner } from '@chakra-ui/react';
+import { Flex, VStack, Button, useToast } from '@chakra-ui/react';
 
 import Publish from "./Publish";
 import ExploreFeed from "./ExploreFeed";
@@ -17,11 +17,22 @@ export default function MainPageContent() {
     const [isHome, setIsHome] = useState(true);
 
     return(
-    <>
-        <Button onClick={() => setIsHome(true)}>Home</Button>
-        <Button onClick={() => setIsHome(false)}>Explore</Button>
-        <Publish setNewPost={setNewPost}/>
-        {isHome ? <HomeFeed newPost={newPost}/> : <ExploreFeed newPost={newPost}/>}
-    </>
+        <Flex  pt={4} pl={4}>
+            {/* Left Section: Home and Explore Buttons */}
+            <VStack spacing={4} align="stretch" mr={8}>
+                <Button onClick={() => setIsHome(true)} colorScheme={isHome ? 'blue' : 'gray'} w="full">
+                    Home
+                </Button>
+                <Button onClick={() => setIsHome(false)} colorScheme={!isHome ? 'blue' : 'gray'} w="full">
+                    Explore
+                </Button>
+            </VStack>
+
+            {/* Right Section: Publish Component and Feeds */}
+            <VStack align="flex-start" w="full">
+                <Publish setNewPost={setNewPost} />
+                {isHome ? <HomeFeed newPost={newPost} /> : <ExploreFeed newPost={newPost} />}
+            </VStack>
+        </Flex>
     )
 }

@@ -7,6 +7,9 @@ import { useState, useEffect } from 'react';
 import { abi, contractAddress } from '../constants';
 
 import Link from 'next/link';
+import Image from 'next/image';
+
+import { Link as ChakraLink, Box, Spinner } from "@chakra-ui/react";
 
 import Profile from "./Profile";
 
@@ -72,10 +75,14 @@ export default function FollowersList({ handle }) {
     if (isLoading) return <>Spinner</>
     
     return(
-        <>
-            <Link href={`/profile/${handle}`}>Return</Link>
-            <>{user.followersList.number.toString()} followers</>
-            <>{displayedUsers}</>
-        </>
+        <Box>
+            {isLoading ? <Spinner/> : <>
+                <ChakraLink mb={4} mt={4} ml={4} display="block"><Link href={`/profile/${handle}`}><Image src="/arrow.png" alt="return" width={30} height={33}/></Link></ChakraLink>
+                <Box mb={4} ml={4} mr={4}>
+                    <Box fontWeight="bold" mb={6}>{(user.followersList.number.toString() == 0 || user.followersList.number.toString() == 1) ? <>{user.followersList.number.toString()} follower</> : <>{user.followersList.number.toString()} followers</>}</Box>
+                    <Box>{displayedUsers}</Box>
+                </Box>
+            </>}
+        </Box>
     )
 }

@@ -1,6 +1,6 @@
 'use client'
 // ChakraUI
-import { Flex, Alert, AlertIcon, Heading, Input, Button, useToast, Spinner } from '@chakra-ui/react';
+import { Input, Button, useToast, Box } from '@chakra-ui/react';
 
 // Wagmi
 import { prepareWriteContract, writeContract, waitForTransaction, readContract } from '@wagmi/core';
@@ -54,8 +54,19 @@ export default function ChangeName({ setNameChange }) {
             e.preventDefault();
             changeName(value)
             setValue("")}}>
-            <Input type="text" value={value} onChange={(e) => setValue(e.target.value)} maxLength={24}/>
-            <button type="submit">Change name</button>
+            <Box display="flex" alignItems="center" justifyContent="center">
+        <Input
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          maxLength={24}
+          mr={2}
+          placeholder="Enter new name"
+        />
+        <Button type="submit" variant="solid" colorScheme="blue">
+          Change name
+        </Button>
+      </Box>
         </form>
     )
 }

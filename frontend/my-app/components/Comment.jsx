@@ -1,6 +1,6 @@
 'use client'
 // ChakraUI
-import { Flex, Alert, AlertIcon, Heading, Input, Button, useToast, Spinner } from '@chakra-ui/react';
+import { Flex, Box, Textarea, Button, useToast, Text, Spinner } from '@chakra-ui/react';
 
 // Wagmi
 import { prepareWriteContract, writeContract, waitForTransaction, readContract } from '@wagmi/core';
@@ -50,12 +50,17 @@ export default function Comment({ id, setNewComment }) {
     };
 
     return(
-        <form onSubmit={(e) => {
-            e.preventDefault();
-            comment(value);
-            setValue("")}}>
-            <Input type="text" value={value} onChange={(e) => setValue(e.target.value)} maxLength={300}/>
-            <button type="submit">Publish</button>
-        </form>
+        <Box w="full" p={4} pr={100} borderRadius="md">
+            <Textarea value={value} onChange={(e) => setValue(e.target.value)} resize="vertical" minHeight="100px" maxLength={300} placeholder="Post your reply" fontSize="md" border="1px solid #ccc" _focus={{outline: 'none', border: '1px solid #3182CE',}}/>
+            <Flex justify="space-between" align="center" mt={2}>
+                <Text color={value ? (value.length >= 250 ? (value.length >= 300 ? 'red.500' : 'orange.500') : 'gray.500') : 'gray.500'}>{value ? value.length : 0}/300</Text>
+                <Button colorScheme="blue" onClick={(e) => {
+                    e.preventDefault();
+                    comment(value);
+                    setValue('');}}>
+                    Comment
+                </Button>
+            </Flex>
+        </Box>
     )
 }

@@ -10,7 +10,7 @@ import { readContract, prepareWriteContract, writeContract, waitForTransaction }
 import { useAccount, usePublicClient } from 'wagmi';
 
 import { abi, contractAddress } from '../constants';
-import { Button } from '@chakra-ui/react';
+import { Button, Spinner, Box, Flex, Grid, GridItem, Text, Link as ChakraLink } from '@chakra-ui/react';
 
 import Link from 'next/link'
 
@@ -147,19 +147,30 @@ export default function ProfilePageContent({ handle }) {
         }
     }, [user])
 
-    if (isLoading) return <>Spinner</>
-
     return(
-        <>
-            <>{user.name}</>
-            <>{handle}</>
-            {user.SFTIDs.length > 0 ? <DisplaySFTs user={user}/> : <></>}
-            <>Score : {user.score.toString()}</>
-            <Link href={`/profile/${handle}/followers`}>{user.followersList.number.toString()} followers</Link>
-            <Link href={`/profile/${handle}/followings`}>{user.followingsList.number.toString()} followings</Link>
-            {isUser ? <ChangeName setNameChange={setNameChange}/> : <></>}
-            {isUser ? <></> : <>{isFollowing ? <Button onClick={unfollow}>Unfollow</Button> : <Button onClick={follow}>Follow</Button>}</>}
-            <>{displayedPosts}</>
-        </>
+        <Grid templateColumns="repeat(2, 1fr)" columnGap={4} p={4}>
+            {isLoading ? <Spinner/> : <>
+                <GridItem colSpan={1}>
+                    <Box>
+                        <Text fontWeight="bold" fontSize="xl" mb={2}>{user.name}</Text>
+                        <Text color="gray.600" mb={2}>{handle}</Text>
+                        <Text mb={4}>Score: {user.score.toString()}</Text>
+                        <ChakraLink color="red.700" mr={30}><Link href={`/profile/${handle}/followers`} mt={2} display="block">{(user.followersList.number.toString() == "0" || user.followersList.number.toString() == "1") ? <>{user.followersList.number.toString()} Follower</> : <>{user.followersList.number.toString()} Followers</>}</Link></ChakraLink>
+                        <ChakraLink color="red.700" mr={30}><Link href={`/profile/${handle}/followings`} mt={2} display="block">{(user.followingsList.number.toString() == "0" || user.followingsList.number.toString() == "1") ? <>{user.followingsList.number.toString()} Following</> : <>{user.followingsList.number.toString()} Followings</>}</Link></ChakraLink>
+                        {isUser ? <Box mt={4}><ChangeName setNameChange={setNameChange} /></Box> : null}
+                        {!isUser && (isFollowing ? <Button onClick={unfollow}>Unfollow</Button> : <Button onClick={follow}>Follow</Button>)}
+                        <Box maxW="xl" w="full" mx="auto" mt={10}>
+                            {displayedPosts}
+                        </Box>
+                    </Box>
+                </GridItem>
+
+                <GridItem colSpan={1}>
+                    <Flex justifyContent="center" alignItems="top" h="100%">
+                    {user.SFTIDs.length > 0 && <DisplaySFTs user={user} />}
+                    </Flex>
+                </GridItem>
+            </>}
+        </Grid>
     )
 }

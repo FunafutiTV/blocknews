@@ -11,7 +11,7 @@ Block News est un projet de réseau social basé sur l'idée du journalisme déc
 
 # Liens
 
-- Application déployée sur Vercel : blocknews-seven.vercel.app
+- Application déployée sur Vercel : <a href="https://blocknews-seven.vercel.app/">blocknews-seven.vercel.app</a>
 
 - Smart contract déployé sur Sepolia :
 

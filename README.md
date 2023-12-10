@@ -13,7 +13,7 @@ Block News est un projet de réseau social basé sur l'idée du journalisme déc
 
 - Application déployée sur Vercel : <a href="https://blocknews-seven.vercel.app/">blocknews-seven.vercel.app</a>
 
-- Smart contract déployé sur Sepolia :
+- Smart contract déployé sur Sepolia : <a href="https://sepolia.etherscan.io/address/0xDd0f9f4E09589272850F6807A13fB9c3D17bb366">sepolia.etherscan.io/address/0xDd0f9f4E09589272850F6807A13fB9c3D17bb366</a>
 
 - Vidéo de démonstration de la Dapp :
 

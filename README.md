@@ -15,7 +15,7 @@ Block News est un projet de réseau social basé sur l'idée du journalisme déc
 
 - Smart contract déployé sur Sepolia : <a href="https://sepolia.etherscan.io/address/0xDd0f9f4E09589272850F6807A13fB9c3D17bb366">sepolia.etherscan.io/address/0xDd0f9f4E09589272850F6807A13fB9c3D17bb366</a>
 
-- Vidéo de démonstration de la Dapp :
+- Vidéo de démonstration de la Dapp (en 2 parties car la version gratuite de Loom limite les vidéos à 5 minutes) : <a href="https://www.loom.com/share/33f4063a313d416a809a13f14e2e867a">loom.com/share/33f4063a313d416a809a13f14e2e867a</a> (1/2) - <a href="https://www.loom.com/share/5fe17ab32a5248b1a920aa0e12580615">loom.com/share/5fe17ab32a5248b1a920aa0e12580615</a> (2/2)
 
 # Backend
 

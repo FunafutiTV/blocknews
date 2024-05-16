@@ -1,0 +1,271 @@
+html {
+    font-size: 0.6em;
+}
+
+#header {
+    z-index: 2;
+    background-color: white;
+}
+
+.footer {
+    line-height: 1.15;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    background-color: rgb(40, 40, 40);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    text-align: center;
+    user-select: none;
+    
+  }
+  
+.footer span {
+    color: rgb(230, 230, 230);
+    display: flex;
+    justify-content: center;
+    font-size: 0.8em;
+    padding: 0.2em 0 0.2em 0;
+    font-style: italic;
+}
+  
+.footer span a {
+    color: rgb(230, 230, 230);
+    text-decoration: none;
+    font-weight: bold;
+    padding-left: 0.2em;
+}
+  
+.footer span img {
+    width: 1.2em;
+}
+
+.connected {
+    background: linear(to-br, rgba(255,255,255,1), rgba(255,255,255,1) 30%, rgba(240,250,255,1));
+}
+
+.notConnected {
+    background-image: url("../../public/bg.png");
+    background-size: cover;
+}
+
+.page {
+    z-index: 1;
+    padding-top: 9em;
+    padding-bottom: 3em;
+    
+}
+
+.post {
+    max-width: 90vw;
+}
+
+.sftname {
+    font-size: 5px;
+}
+
+.choosePicture {
+    width: 9vw;
+    height: 9vw;
+    margin: 0.5vw;
+}
+
+.choosePicture img {
+    width: 9vw;
+    height: 9vw;
+}
+
+#mainpage {
+    padding-top: 1em;
+    grid-template-columns: 1fr;
+}
+
+#topuserslist {
+    display: none;
+}
+
+#categories {
+    display: none;
+}
+
+#feeds {
+    position: relative;
+    padding: 0.8em;
+    padding-top: 9em;
+    width: 100%;
+}
+
+#logo {
+    height: 4em;
+    width: 4em;
+    background-image: url('../../public/icon.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#profile {
+    display: block;
+}
+
+#profileEdit {
+    display: block;
+}
+
+#displaysft {
+    padding-left: 0.7em;
+}
+
+#displaysft p {
+    text-align: left;
+}
+
+#displaysft div {
+    align-items: start;
+    justify-content: left;
+}
+
+#feeds div {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.feed {
+    width: 23%;
+}
+
+.feed:nth-child(1), .feed:nth-child(2) {
+    width: 48%;
+}
+
+@media (orientation: landscape) {
+    #profileEdit {
+        display: grid;
+    }
+
+    .choosePicture {
+        width: 6vw;
+        height: 6vw;
+    }
+
+    .choosePicture img {
+        width: 6vw;
+        height: 6vw;
+    }
+}
+
+@media (min-width: 28em) {
+    html {
+        font-size: 0.75em;
+    }
+}
+
+@media (min-width: 40em) {
+
+    #logo {
+        height: 4em;
+        width: 15.2em;
+        background-image: url('../../public/logoBlockNews.jpg');
+    }
+
+}
+
+@media (min-width: 52em) {
+
+    #mainpage {
+        padding-top: 14em;
+        grid-template-columns: 4fr 2fr;
+    }
+
+    #feeds {
+        position: fixed;
+        margin-top: 8em;
+        z-index: 2;
+        background-color: white;
+        padding: 0.8em;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #feeds div {
+        flex-wrap: nowrap;
+    }
+
+    #topuserslist {
+        display: initial;
+    }
+
+    #profile {
+        display: grid;
+    }
+
+    #displaysft {
+        padding-left: 0;
+    }
+
+    #displaysft p {
+        text-align: center;
+    }
+
+    #displaysft div {
+        align-items: top;
+        justify-content: center;
+    }
+
+    .post {
+        max-width: 50vw;
+    }
+
+    .feed, .feed:nth-child(1), .feed:nth-child(2) {
+        width: 100%;
+        margin: 0.3em;
+    }
+
+}
+
+@media (min-width: 66em) {
+
+    html {
+        font-size: 1em;
+    }
+
+    #feeds {
+        margin-top: 9em;
+        margin-left: 2em;
+        padding: 0;
+        width: 13vw;
+        background-color: transparent;
+        border-bottom: none;
+        z-index: 1;
+    }
+
+    #feeds div {
+        flex-direction: column;
+    }
+    
+    #mainpage {
+        padding-top: 9em;
+        margin-left: 16vw;
+    }
+
+    #categories {
+        display: initial;
+    }
+
+    .post {
+        max-width: 40vw;
+    }
+
+    .sftname {
+        font-size: 6px;
+    }
+
+    .feed {
+        margin-left: 0.9em;
+        max-width: 90%;
+    }
+
+    .feed:nth-child(1), .feed:nth-child(2) {
+        margin-left: 0;
+        max-width: 100%;
+    }
+}

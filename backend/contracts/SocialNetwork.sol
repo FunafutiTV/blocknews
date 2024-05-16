@@ -15,7 +15,7 @@ import "./TopUsersSFT.sol";
  *
  * This contract deploys an instance of the TopUsersSFT contract.
  *
- * This contract only cover a limited number of interactions and could be greatly improved.
+ * This contract only cover a limited number of social network interactions.
  */ 
 contract SocialNetwork is Ownable {
 
@@ -26,17 +26,24 @@ contract SocialNetwork is Ownable {
      * @dev
      * This structure will be used in a mapping to match with the post's ID
      * The content string contains the text of the post
+     * The link string contains the link of the source
+     * The date uint contains the timestamp of the publication of the post
      * If the post has a parent post, its ID is the isCommentOfID uint
+     * If it is a repost, the ID of the original post is in the isRepostOf uint
      * Each comments will be pushed in the commentsIDs array
      */
     struct Post {
         bool exists;
         uint id;
         address poster;
+        uint isRepostOf;
         string content;
         uint isCommentOfID;
         int score;
         uint[] commentsIDs;
+        uint date;
+        string link;
+        uint category;
     }
 
     /** 
@@ -49,15 +56,14 @@ contract SocialNetwork is Ownable {
     struct Follow {
         bool follows;
         uint positionInFollowingsArray;
-        uint positionInFollowersArray;
     }
 
     /** 
      * @dev
-     * This structure will be used to store the followers and followings list of a user
-     * followList contains the actual array while number contains the number of followers or followings
+     * This structure will be used to store the followings list of a user
+     * followList contains the actual array while number contains the number of followings
      * followList.length wouldn't work to get number because when the unfollow function is called, the unfollowed 
-     * user's address in replaced by an address 0 which we don't want to count as a follower or following
+     * user's address in replaced by an address 0 which we don't want to count as a following
      */
     struct FollowList {
         address[] followList;
@@ -67,17 +73,33 @@ contract SocialNetwork is Ownable {
     /** 
      * @dev
      * This structure will be used in a mapping to match with the user's address
-     * The name string is an empty string by default but can be updated using the changeName function
-     * Each posts will be pushed in the postsIDs array
+     * The name and description strings are empty by default but they can be updated using functions
+     * The lastPostsIDs array contains the 25 last posts of the user
+     * The positionInPostsArray uint is used to write each new post in the array
+     * Each new post will be written in the lastPostsIDs array, at the position of positionInPostsArray
      * If the user is rewarded an SFT, it will be pushed in the SFTIDs array
      */
     struct User {
         string name;
         int score;
+        string description;
+        uint picture;
         FollowList followingsList;
-        FollowList followersList;
-        uint[] postsIDs;
+        uint numberOfFollowers;
+        uint[25] lastPostsIDs;
+        uint positionInPostsArray;
         uint[] SFTIDs;
+    }
+
+    /** 
+     * @dev
+     * This structure will be used in a mapping to match with the category's number
+     * The lastPosts array contains the 40 last posts of the category
+     * The positionInArray uint is used to write each new post in the array
+     */
+    struct Category {
+        uint[40] lastPosts;
+        uint positionInArray;
     }
 
     /// @dev This mapping links every uint (month) to a score (can be negative) for each address
@@ -94,6 +116,9 @@ contract SocialNetwork is Ownable {
 
     /// @dev This mapping links every address to a User struct
     mapping (address => User) userByAddress;
+
+    /// @dev This mapping links every uint to a category struct
+    mapping (uint => Category) category;
     
     /** 
      * @dev
@@ -104,11 +129,25 @@ contract SocialNetwork is Ownable {
 
     /// @notice This variable contains the current month (first 4 digits = year, 2 last digits = month)
     /// @dev This variable will be incremented every time rewardTopUsers is called
-    uint public month = 202312;
+    uint public month = 202404;
 
     /// @notice This variable contains the ID that will be taken by the next post
     /// @dev This variable is incremented every time post is called
     uint public nextUnusedPublicationID = 1;
+
+    /** 
+     * @dev
+     * This is the number of categories used in the app, stored in a constant
+     * It could be modified in future versions without having to change anything else in the contract
+     */
+    uint numberOfCategories = 4;
+
+    /** 
+     * @dev
+     * This is the number of profile pictures available in the app, stored in a constant
+     * It could be modified in future versions without having to change anything else in the contract
+     */
+    uint numberOfPictures = 20;
     
     /// @dev This is an instance of the TopUsersSFT contract that will be used in rewardTopUsers
     TopUsersSFT topUsersSFT = new TopUsersSFT();
@@ -118,6 +157,13 @@ contract SocialNetwork is Ownable {
     /// @param publicationID The ID of the new post
     /// @param poster The address of the poster
     event NewPost(uint publicationID, address poster);
+
+    /// @notice This event will be emitted every time a repost is made
+    /// @dev This event will be emitted every time the repost function is executed
+    /// @param reposter The address of the poster
+    /// @param repostedPublicationID The ID of the original post
+    /// @param repostPublicationID The ID of the new post
+    event Reposted(address reposter, uint repostedPublicationID, uint repostPublicationID);
 
     /// @notice This event will be emitted every time a post is upvoted
     /// @dev This event can be emitted when the upvote function is executed
@@ -149,6 +195,19 @@ contract SocialNetwork is Ownable {
     /// @param previousName The previous name of the user
     /// @param previousName The new name of the user
     event ChangedName(address user, string previousName, string newName);
+
+    /// @notice This event will be emitted every time a user changes their description
+    /// @dev This event will be emitted everytime the changeDescription function is executed
+    /// @param user The address of the user that changes their name
+    /// @param timestamp The timestamp of when the function was called
+    event ChangedDescription(address user, uint timestamp);
+
+    /// @notice This event will be emitted every time a user changes their profile picture
+    /// @dev This event will be emitted everytime the changePicture function is executed
+    /// @param user The address of the user that changes their picture
+    /// @param previousPicture The ID of the previous picture
+    /// @param newPicture The ID of the new picture
+    event ChangedPicture(address user, uint previousPicture, uint newPicture);
 
     /// @notice This event might be emitted when a user upvotes or downvotes a post
     /// @dev This event will be emitted every time the topUsers array is modified
@@ -197,6 +256,12 @@ contract SocialNetwork is Ownable {
         return follows[_user][_target].follows;
     }
 
+    /// @return address[10] An array containing the addresses of the 10 top users
+    /// @dev This function retuens the topUsers array
+    function getTopUsers() external view returns (address[10] memory) {
+        return topUsers;
+    }
+
     /// @param _publicationID The ID of the publication
     /// @return Post The Post struct of the publication
     /// @dev This function uses the postByID mapping, and reverts if the publication doesn't exist
@@ -210,6 +275,14 @@ contract SocialNetwork is Ownable {
     function getUser(address _user) external view returns (User memory) {
         require (_user != address(0), "User with address 0 does not exist");
         return userByAddress[_user];
+    }
+
+    /// @param _category The ID of the category
+    /// @return uint[40] An array containing the IDs of the 40 most recent posts of this category
+    /// @dev This function uses the category mapping, and reverts if _category is bigger than numberOfCategories
+    function getLastPostsFromCategory(uint _category) external view returns (uint[40] memory) {
+        require(_category <= numberOfCategories, "This category does not exist");
+        return category[_category].lastPosts;
     }
 
     /// @param _user The address of the queried user
@@ -231,10 +304,10 @@ contract SocialNetwork is Ownable {
     /** 
      * @dev
      * This function queries the topUsersSFT contract using the uri function of ERC1155
-     * The 202312 parameter is arbitrary because the same URI is returned no matter the parameter
+     * The 202404 parameter is arbitrary because the same URI is returned no matter the parameter
      */
     function getSFTURI() external view returns (string memory) {
-        return topUsersSFT.uri(202312);
+        return topUsersSFT.uri(202404);
     }
 
     function upvoteOrDownvote(address _user, uint _publicationID) public publicationExists(_publicationID) view returns (uint) {
@@ -299,20 +372,65 @@ contract SocialNetwork is Ownable {
         emit ChangedName(msg.sender, previousName, _newName);
     }
 
+    /// @notice This function changes the description of the user calling it
+    /// @param _newDescription The new description to be assigned to the user.
+    /** 
+     * @dev
+     * This function changes the description of the user to the given string, given it doesn't exceed 300 characters
+     * This function emits the ChangedDescription event
+     */
+    function changeDescription(string calldata _newDescription) external {
+        require(bytes(_newDescription).length <= 300, "Description must not be longer than 300 characters");
+        userByAddress[msg.sender].description = _newDescription;
+        emit ChangedDescription(msg.sender, block.timestamp);
+    }
+
+    /// @notice This function changes the profile picture of the user calling it
+    /// @param _newPicture The ID of the new picture
+    /** 
+     * @dev
+     * This function changes the profile picture of the user to the given ID
+     * This function will revert if _newPicture is bigger than numberOfPictures
+     * The ID is given to the frontend, which will use it to get the actual picture
+     * This function emits the ChangedPicture event
+     */
+    function changePicture(uint _newPicture) external {
+        require(_newPicture <= numberOfPictures, "Picture with given number does not exist");
+        uint previousPicture = userByAddress[msg.sender].picture;
+        userByAddress[msg.sender].picture = _newPicture;
+        emit ChangedPicture(msg.sender, previousPicture, _newPicture);
+    }
+
     /// @notice This function publishes a post with a given content and parent ID (set to 0 if it is not a comment)
     /// @param _content The content of the post to be created
+    /// @param _link The link of the source
+    /// @param _category The ID of the category
     /// @param _parentPostID The ID of the parent post if it's a comment (0 for a new post)
     /** 
      * @dev
-     * This function creates a new post or comment based on the provided content and parent post ID
+     * This function creates a new post or comment based on the provided content, link, category and parent post ID
      * This function reverts if a post with the next unused publication ID already exists
      * This function reverts if _content doesn't have between 1 and 300 characters
+     * This function reverts if a category other than 0 is given to a comment
+     * This function reverts if _category is bigger than numberOfCategories
+     * This function reverts if _link is longer than 300 characters
+     * This function reverts if _link is shorter than 10 characters
+     * If the post is a comment, the function does not revert if _link is empty
+     * This function reverts if the parent post already has 40 comments
+     * The category ID is given to the frontend, which will use it to get the actual category
+     * This function stores the new post ID in the lastPostsIDs array of its author
+     * This function stores the new post ID in the lastPosts array of its category
      * This function links a comment to its parent post and emits a NewPost event
      */
-    function post(string calldata _content, uint _parentPostID) external { // attention si cette fonction n'est pas appelée par la dapp peut causer des soucis
+    function post(string calldata _content, string calldata _link, uint _category, uint _parentPostID) external {
         require(!postByID[nextUnusedPublicationID].exists, "Error : Post already exists");
         require(bytes(_content).length != 0, "Publication can't be empty");
         require(bytes(_content).length <= 300, "Publications are limited to 300 characters");
+        require (_parentPostID != 0 && _category == 0 || _parentPostID == 0, "Comments can not have a category");
+        require(_category <= numberOfCategories, "This category does not exist");
+        require((_parentPostID != 0 && bytes(_link).length == 0) || (bytes(_link).length > 10), "Links must be at least 10 characters long, unless post is a comment in which case it can be empty");
+        require(bytes(_link).length <= 300, "Links are limited to 300 characters");
+        require(_parentPostID == 0 || postByID[_parentPostID].commentsIDs.length < 40, "Posts can not have more than 40 comments");
         uint _publicationID = nextUnusedPublicationID;
         if (_parentPostID != 0) {
             require(postByID[_parentPostID].exists, "Parent post doesn't exist");
@@ -323,7 +441,21 @@ contract SocialNetwork is Ownable {
         postByID[_publicationID].id = _publicationID;
         postByID[_publicationID].poster = msg.sender;
         postByID[_publicationID].content = _content;
-        userByAddress[msg.sender].postsIDs.push(_publicationID);
+        postByID[_publicationID].date = block.timestamp;
+        postByID[_publicationID].link = _link;
+        postByID[_publicationID].category = _category;
+        userByAddress[msg.sender].lastPostsIDs[userByAddress[msg.sender].positionInPostsArray] = _publicationID;
+        if (userByAddress[msg.sender].positionInPostsArray == 24) {
+            userByAddress[msg.sender].positionInPostsArray = 0;
+        } else {
+            ++userByAddress[msg.sender].positionInPostsArray;
+        }
+        category[_category].lastPosts[category[_category].positionInArray] = _publicationID;
+        if (category[_category].positionInArray == 39) {
+            category[_category].positionInArray = 0;
+        } else {
+            ++category[_category].positionInArray;
+        }
         ++nextUnusedPublicationID;
         emit NewPost(_publicationID, msg.sender);
     }
@@ -392,25 +524,53 @@ contract SocialNetwork is Ownable {
         setNewTopUsers(_poster);
     }
 
+    /// @notice This function repost the publication with given ID
+    /// @param _reposted The ID of the original post
+    /** 
+     * @dev
+     * This function creates a new post that points to the original post
+     * This function reverts if a post with the next unused publication ID already exists
+     * This function reverts if the original post is already a repost
+     * This function stores the new post ID in the lastPostsIDs array of its author
+     * This function emits a Reposted event
+     */
+    function repost(uint _reposted) external publicationExists(_reposted) {
+        require(!postByID[nextUnusedPublicationID].exists, "Error : Post already exists");
+        require(postByID[_reposted].isRepostOf == 0, "You can not repost a repost");
+        uint _publicationID = nextUnusedPublicationID;
+        postByID[_publicationID].exists = true;
+        postByID[_publicationID].id = _publicationID;
+        postByID[_publicationID].poster = msg.sender;
+        postByID[_publicationID].isRepostOf = _reposted;
+        userByAddress[msg.sender].lastPostsIDs[userByAddress[msg.sender].positionInPostsArray] = _publicationID;
+        if (userByAddress[msg.sender].positionInPostsArray == 24) {
+            userByAddress[msg.sender].positionInPostsArray = 0;
+        } else {
+            ++userByAddress[msg.sender].positionInPostsArray;
+        }
+        ++nextUnusedPublicationID;       
+        emit Reposted(msg.sender, _reposted, _publicationID);
+    }
+
     /// @notice This function allows the user to follow another user
     /// @param _followed The address of the user to be followed
     /** 
      * @dev
      * This function reverts if the caller passes its own address as argument
      * This function reverts if the caller already follows the user in argument
+     * This function reverts if the caller already follows 40 users
      * This function allows a user to follow another user by updating their follow status
-     * This function updates the follow status, follow lists, and emits a Followed event
+     * This function updates the follow status, followings list, number of followers and emits a Followed event
      */
     function follow(address _followed) public {
         require(_followed != msg.sender, "You can't follow yourself");
         require(!follows[msg.sender][_followed].follows, "You already follow this user");
+        require(userByAddress[msg.sender].followingsList.number < 40, "You can not follow more than 40 users");
         follows[msg.sender][_followed].follows = true;
         userByAddress[msg.sender].followingsList.followList.push(_followed);
         ++userByAddress[msg.sender].followingsList.number;
-        userByAddress[_followed].followersList.followList.push(msg.sender);
-        ++userByAddress[_followed].followersList.number;
+        ++userByAddress[_followed].numberOfFollowers;
         follows[msg.sender][_followed].positionInFollowingsArray = userByAddress[msg.sender].followingsList.followList.length - 1;
-        follows[msg.sender][_followed].positionInFollowersArray = userByAddress[_followed].followersList.followList.length - 1;
         emit Followed(msg.sender, _followed);
     }
 
@@ -421,18 +581,16 @@ contract SocialNetwork is Ownable {
      * This function reverts if the caller passes its own address as argument
      * This function reverts if the caller doesn't follow the user in argument
      * This function allows a user to unfollow another user by updating their follow status
-     * This function updates the follow status, follow lists, and emits a Unfollowed event
+     * This function updates the follow status, followings list, number of followers and emits a Unfollowed event
      */
     function unfollow(address _unfollowed) public {
         require(_unfollowed != msg.sender, "You can't unfollow yourself");
         require(follows[msg.sender][_unfollowed].follows, "You don't follow this user");
         follows[msg.sender][_unfollowed].follows = false;
         uint positionInFollowingsArray = follows[msg.sender][_unfollowed].positionInFollowingsArray;
-        uint positionInFollowersArray = follows[msg.sender][_unfollowed].positionInFollowersArray;
         userByAddress[msg.sender].followingsList.followList[positionInFollowingsArray] = address(0);
         --userByAddress[msg.sender].followingsList.number;
-        userByAddress[_unfollowed].followersList.followList[positionInFollowersArray] = address(0);
-        --userByAddress[_unfollowed].followersList.number;
+        --userByAddress[_unfollowed].numberOfFollowers;
         emit Unfollowed(msg.sender, _unfollowed);
     }
 
@@ -442,6 +600,7 @@ contract SocialNetwork is Ownable {
      * This function reverts if not called by the owner
      * This function reverts if one of the top users already owns a SFT with the current month as ID
      * This function queries the topUsersSFT contract
+     * This function sets the topUsers array back to 0
      * This function updates the month for the next reward period, depending on the current month
      */
     function rewardTopUsers() public onlyOwner {
@@ -450,6 +609,7 @@ contract SocialNetwork is Ownable {
                 require(!hasBeenRewarded(topUsers[i], month), "This user has already been rewarded");
                 topUsersSFT.mintOne(topUsers[i], month);
                 userByAddress[topUsers[i]].SFTIDs.push(month);
+                topUsers[i] = address(0);
             }
         }
         if (month % 100 == 12) {

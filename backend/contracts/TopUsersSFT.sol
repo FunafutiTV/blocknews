@@ -43,7 +43,7 @@ contract TopUsersSFT is ERC1155, Ownable {
      */
     function mintOne(address _user, uint256 _id) public onlyOwner {
         require(_user != address(0), "Invalid address");
-        require((_id >= 202312) && (_id <= 202612) && (_id % 100 >= 1) && (_id % 100 <= 12), "Invalid ID");
+        require((_id >= 202404) && (_id <= 202612) && (_id % 100 >= 1) && (_id % 100 <= 12), "Invalid ID");
         _mint(_user, _id, 1, "");
         emit Minted(_user, _id);
     }

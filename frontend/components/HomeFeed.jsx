@@ -136,7 +136,7 @@ export default function HomeFeed({ newPost, seeMoreNumber }) {
     }, [allPostsFetched]);
 
     return(
-        <Box mx="auto" textAlign="center">
+        <Box mx="auto" maxW="xl" w="full" textAlign="center">
             {isLoading ? <Spinner/> :
                 <>{displayedPosts.length == 0 ? <Text fontWeight="bold" textAlign="center">Posts from people you follow will appear here.</Text> :
                     <>

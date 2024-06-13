@@ -51,10 +51,18 @@ export default function Home({params : { id }}) {
         if (currentID) {
             if (id >= currentID || id == 0) {
                 setThrow404(true);
+            } else {
+                setIsLoading(false);
             }
+        }
+    }, [currentID]);
+
+    // Stop loading if 404
+    useEffect(() => {
+        if (throw404) {
             setIsLoading(false);
         }
-    }, [currentID])
+    }, [throw404]);
 
     return(
         <Box className={isConnected ? "connected" : "notConnected"} minHeight="100vh">

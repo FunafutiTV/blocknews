@@ -35,6 +35,7 @@ export default function ProfilePageContent({ handle }) {
     // States
     const [user, setUser] = useState({})
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingPosts, setIsLoadingPosts] = useState(true);
     const [isUser, setIsUser] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
     const [isFollowedBy, setIsFollowedBy] = useState(false);
@@ -167,6 +168,8 @@ export default function ProfilePageContent({ handle }) {
             });
             if (!data.isCommentOfID) {
                 setDisplayedPosts((posts) => [...posts, <Post publication={data} key={id}/>]);
+            } else {
+                setIsLoadingPosts(false);
             }
         } 
         catch (err) {
@@ -196,6 +199,9 @@ export default function ProfilePageContent({ handle }) {
     // Second useEffect
     useEffect(() => {
         if (user.lastPostsIDs && !noSecondCall) {
+            if (user.lastPostsIDs[0].toString() == "0") {
+                setIsLoadingPosts(false);
+            }
             for(let i = user.lastPostsIDs.length - 1; i >= 0; i--) {
                 user.lastPostsIDs[i] = user.lastPostsIDs[i].toString();
             };
@@ -212,11 +218,18 @@ export default function ProfilePageContent({ handle }) {
                 }
             };
         }
-    }, [user])
+    }, [user]);
+
+    // Stop loading
+    useEffect(() => {
+        if (displayedPosts.length > 0) {
+            setIsLoadingPosts(false);
+        }
+    }, [displayedPosts]);
 
     return(
         <Box className='page'>
-            {isLoading ? <Spinner/> : <>
+            {isLoading ? <Box mx="auto" maxW="xl" w="full" textAlign="center"><Spinner/></Box> : <>
                 <Grid id="profile" templateColumns="2fr 1fr" columnGap={4} pl={6} pr={4}>   
 
                     {/* Left Section: Profile informations */}
@@ -252,7 +265,9 @@ export default function ProfilePageContent({ handle }) {
 
                 {/* Bottom Section : Recent posts */}
                 <Box maxW="xl" w="full" mx="auto" mt={5}>
-                    {displayedPosts.length == 0 ? <Text fontWeight="bold">No recent post found.</Text> : displayedPosts}
+                    {isLoadingPosts ? <Spinner/> : <>
+                        {displayedPosts.length == 0 ? <Text fontWeight="bold">No recent post found.</Text> : displayedPosts}
+                    </>}
                 </Box>   
             </>}
         </Box>

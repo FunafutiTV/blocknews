@@ -49,7 +49,9 @@ export default function CategoryFeed({ newPost, category }) {
                 args: [id],
             });
             if (!data.isCommentOfID && !data.isRepostOf) { // Don't display post if it's a comment or a repost
-                setDisplayedPosts((posts) => [...posts, <Post publication={data} key={id}/>])
+                setDisplayedPosts((posts) => [...posts, <Post publication={data} key={id}/>]);
+            } else {
+                setIsLoading(false);
             }
         } 
         catch (err) {
@@ -68,6 +70,9 @@ export default function CategoryFeed({ newPost, category }) {
     // Second useEffect
     useEffect(() => {
         if (postsIDs.length && !noSecondCall) {
+            if (postsIDs[0].toString() == "0") {
+                setIsLoading(false);
+            }
             for(let i = postsIDs.length - 1; i >= 0; i--) {
                 postsIDs[i] = postsIDs[i].toString();
             };
@@ -83,12 +88,18 @@ export default function CategoryFeed({ newPost, category }) {
                     call(id);
                 }
             })
-            setIsLoading(false);
         }
     }, [postsIDs]);
 
+    // Stop loading
+    useEffect(() => {
+        if (displayedPosts.length > 0) {
+            setIsLoading(false);
+        }
+    }, [displayedPosts]);
+
     return(
-        <Box maxW="xl" w="full" mx="auto">
+        <Box mx="auto" maxW="xl" w="full" textAlign="center">
             {isLoading ? <Spinner/> :
                 <>{displayedPosts.length == 0 ? <Text fontWeight="bold" textAlign="center">No recent post found.</Text> :
                     <>{displayedPosts.map((post, index) => (<Box key={index} mb={6}>{post}</Box>))}</>

@@ -106,7 +106,7 @@ export default function PostPageContent({ id }) {
     }, [publication])
     
     return(
-        <Box className="page" maxW="xl" mx="auto" pl={4} pr={4}>
+        <Box className="page" maxW="xl" mx="auto" pl={4} pr={4} textAlign="center">
             {isLoading ? <Spinner/> : <>
                 {parent.exists && (<Box maxW="80%" borderBottom="1px solid #ddd" p={4} margin="auto" mb={4}>
                     <Text fontWeight="bold" mb={2} textAlign="center">Parent post</Text>

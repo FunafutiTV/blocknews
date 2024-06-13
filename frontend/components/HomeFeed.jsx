@@ -79,6 +79,8 @@ export default function HomeFeed({ newPost, seeMoreNumber }) {
             });
             if (!data.isCommentOfID) { // Don't display post if it's a comment
                 setDisplayedPosts((posts) => [...posts, <Post publication={data} key={id}/>])
+            } else {
+                setIsLoading(false);
             }
         } 
         catch (err) {
@@ -118,6 +120,9 @@ export default function HomeFeed({ newPost, seeMoreNumber }) {
     // Fourth useEffect
     useEffect(() => {
         if (allPostsFetched) {
+            if (postsList[0].toString() == 0) {
+                setIsLoading(false);
+            }
             postsList.sort(function(a, b) { // Sort array from most recent to oldest
                 return b - a;
             })
@@ -131,9 +136,15 @@ export default function HomeFeed({ newPost, seeMoreNumber }) {
                     setAllPostsDisplayed(true);
                 }
             }
-            setIsLoading(false);
         }
     }, [allPostsFetched]);
+
+    // Stop loading
+    useEffect(() => {
+        if (displayedPosts.length > 0) {
+            setIsLoading(false);
+        }
+    }, [displayedPosts]);
 
     return(
         <Box mx="auto" maxW="xl" w="full" textAlign="center">

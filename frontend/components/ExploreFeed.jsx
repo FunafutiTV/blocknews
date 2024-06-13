@@ -35,6 +35,8 @@ export default function ExploreFeed({ newPost, seeMoreNumber }) {
             });
             if (!data.isCommentOfID && !data.isRepostOf) { // Don't display post if it's a comment or a repost
                 setDisplayedPosts((posts) => [...posts, <Post publication={data} key={id}/>]);
+            } else {
+                setIsLoading(false);
             }
         } 
         catch (err) {
@@ -50,6 +52,9 @@ export default function ExploreFeed({ newPost, seeMoreNumber }) {
                 abi: abi,
                 functionName: "nextUnusedPublicationID",
             });
+            if (data.toString() == "1") {
+                setIsLoading(false);
+            }
             setLastPostID(data.toString() - 1);
         } 
         catch (err) {
@@ -74,14 +79,20 @@ export default function ExploreFeed({ newPost, seeMoreNumber }) {
                     setAllPostsDisplayed(true);
                     break;
                 }
-            fetchPost(i);
+                fetchPost(i);
             }
         }
-        setIsLoading(false);
     }, [lastPostID]);
 
+    // Stop loading
+    useEffect(() => {
+        if (displayedPosts.length > 0) {
+            setIsLoading(false);
+        }
+    }, [displayedPosts]);
+
     return(
-        <Box maxW="xl" w="full" mx="auto">
+        <Box mx="auto" maxW="xl" w="full" textAlign="center">
             {isLoading ? <Spinner/> :
                 <>{displayedPosts.length == 0 ? <Text fontWeight="bold" textAlign="center">No recent post found.</Text> :
                     <>

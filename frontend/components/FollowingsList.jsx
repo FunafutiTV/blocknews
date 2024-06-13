@@ -85,7 +85,12 @@ export default function FollowingsList({ handle }) {
     
     return(
         <Box className='page' ml={5}>
-            {isLoading ? <Spinner/> : <>
+            {isLoading ? <>
+                <Link href={`/profile/${handle}`}><Image src="/arrow.png" alt="return" width={30} height={33}/></Link>
+                <Box mx="auto" maxW="xl" w="full" textAlign="center">
+                    <Spinner/>
+                </Box>
+            </> : <>
                 <Link href={`/profile/${handle}`}><Image src="/arrow.png" alt="return" width={30} height={33}/></Link>
                 <Box>
                     <Box fontWeight="bold" mb={4}>{(user.followingsList.number.toString() == 0 || user.followingsList.number.toString() == 1) ? <Text textAlign="center">{user.followingsList.number.toString()} following</Text> : <Text textAlign="center">{user.followingsList.number.toString()} followings</Text>}</Box>

@@ -786,8 +786,10 @@ export const abi = [
 	}
 ]
 
-export const contractAddress = "0xD58a0D610982E8148A31477524aCb01AcD5999A9"
+export const contractAddress = "0xD16B26d5429F7881139A9a44F3Ced0fAA2F99474"
 
 // Adresse Hardhat : 0x5FbDB2315678afecb367f032d93F642f64180aa3
 
-// Adresse Polygon : 0xD58a0D610982E8148A31477524aCb01AcD5999A9
+// Nouvelle adresse Polygon : 0xD16B26d5429F7881139A9a44F3Ced0fAA2F99474
+
+// Ancienne adresse Polygon : 0xD58a0D610982E8148A31477524aCb01AcD5999A9
